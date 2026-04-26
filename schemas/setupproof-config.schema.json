@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SetupProof Config",
+  "description": "Schema for setupproof.yml. The v0.1 parser supports a small YAML subset: two-space indentation, no tabs, string/number/boolean scalars, lists, and x- extension keys.",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^x-": {
+      "description": "Project-local extension fields ignored by SetupProof."
+    }
+  },
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "anyOf": [
+        { "const": 1 },
+        { "const": "1" }
+      ],
+      "description": "SetupProof config format version."
+    },
+    "defaults": {
+      "$ref": "#/$defs/options"
+    },
+    "files": {
+      "type": "array",
+      "description": "Repository-root-relative Markdown files to inspect when no files are passed on the command line.",
+      "items": { "$ref": "#/$defs/repositoryPath" },
+      "uniqueItems": true
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": {
+          "type": "array",
+          "description": "Host environment variables copied into the execution environment without redaction.",
+          "items": { "$ref": "#/$defs/envName" },
+          "uniqueItems": true
+        },
+        "pass": {
+          "type": "array",
+          "description": "Host environment variables copied into the execution environment, optionally marked secret or required.",
+          "items": { "$ref": "#/$defs/envPass" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "description": "Per-block overrides keyed by Markdown file and marker ID.",
+      "items": { "$ref": "#/$defs/block" },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runner": {
+          "enum": ["local", "action-local", "docker"],
+          "description": "Execution runner."
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^\\S+$",
+          "description": "Docker image used when runner is docker."
+        },
+        "timeout": {
+          "$ref": "#/$defs/timeout"
+        },
+        "requireBlocks": {
+          "type": "boolean",
+          "description": "Fail when no marked blocks are found."
+        },
+        "strict": {
+          "type": "boolean",
+          "description": "Enable strict shell mode for marked blocks."
+        },
+        "isolated": {
+          "type": "boolean",
+          "description": "Run each marked block in a fresh workspace and shell state."
+        },
+        "network": {
+          "type": "boolean",
+          "description": "Network policy request. false is enforceable only with the Docker runner."
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "id"],
+      "properties": {
+        "file": { "$ref": "#/$defs/repositoryPath" },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Marker ID in the Markdown file."
+        },
+        "runner": {
+          "enum": ["local", "action-local", "docker"]
+        },
+        "image": {
+          "type": "string",
+          "pattern": "^\\S+$"
+        },
+        "timeout": { "$ref": "#/$defs/timeout" },
+        "strict": { "type": "boolean" },
+        "isolated": { "type": "boolean" },
+        "network": { "type": "boolean" }
+      }
+    },
+    "envPass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/envName" },
+        "secret": {
+          "type": "boolean",
+          "description": "Redact this value from supported output sinks."
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Fail before execution if the variable is missing."
+        }
+      }
+    },
+    "envName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+    },
+    "repositoryPath": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "anyOf": [
+          { "pattern": "^/" },
+          { "pattern": "(^|/)\\.\\.(/|$)" }
+        ]
+      }
+    },
+    "timeout": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*(s|m|h)?$"
+        }
+      ],
+      "description": "Positive integer seconds by default, or a string with s, m, or h suffix."
+    }
+  }
+}

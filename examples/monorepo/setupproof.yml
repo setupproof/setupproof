@@ -1,0 +1,18 @@
+version: 1
+
+defaults:
+  runner: local
+  timeout: 120s
+  requireBlocks: true
+
+files:
+  - docs/web.md
+  - docs/api.md
+
+blocks:
+  - file: docs/web.md
+    id: web-package
+    timeout: 90s
+  - file: docs/api.md
+    id: api-service
+    timeout: 90s

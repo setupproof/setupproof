@@ -1,0 +1,1 @@
+setup-proof compose example

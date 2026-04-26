@@ -1,0 +1,11 @@
+description: Verify marked README quickstarts in a clean temporary workspace
+homepage: ""
+topics:
+  - setup
+  - documentation
+  - markdown
+  - ci
+  - go
+  - github-actions
+  - cli
+  - testing

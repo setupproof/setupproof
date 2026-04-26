@@ -1,0 +1,13 @@
+/setupproof
+*.test
+*.out
+.DS_Store
+/.*
+!/.github/
+!/.github/**
+!/.gitignore
+/coverage.out
+/report.json
+/report.md
+/setupproof-report.json
+/setupproof-report.md
