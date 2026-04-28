@@ -9,6 +9,8 @@ Setup instructions drift.
 SetupProof is for maintainers who want setup instructions to fail in CI before
 users copy them.
 
+![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
+
 Mark the README shell block that should keep working:
 
 ````md
@@ -104,6 +106,8 @@ Do not execute unmarked Markdown shell blocks as SetupProof targets. See
 
 ## Demos And Docs
 
+- `docs/demo/setupproof.gif` shows the short terminal demo used above.
+- `docs/demo/setupproof.tape` regenerates the GIF with VHS.
 - `docs/demo/terminal-demo.sh` regenerates a short terminal demo from source.
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
