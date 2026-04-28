@@ -1,5 +1,7 @@
 # SetupProof
 
+[![SetupProof](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml/badge.svg)](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml)
+
 Verify marked README quickstarts in a clean temporary workspace.
 
 SetupProof is for maintainers who want setup instructions to fail in CI before
