@@ -4,10 +4,12 @@
 
 Verify marked README quickstarts in a clean temporary workspace.
 
+Setup instructions drift.
+
 SetupProof is for maintainers who want setup instructions to fail in CI before
-users copy them. It executes only Markdown shell blocks that a maintainer
-explicitly marks, then reports the block ID, file, line, runner, timeout, and
-result.
+users copy them.
+
+Mark the README shell block that should keep working:
 
 ````md
 <!-- setupproof id=quickstart -->
@@ -16,12 +18,16 @@ go test ./...
 ```
 ````
 
-Review first, then run:
+Then review and run only the marked blocks:
 
 ```sh
 go run ./cmd/setupproof review README.md
 go run ./cmd/setupproof --require-blocks --no-color --no-glyphs README.md
 ```
+
+SetupProof copies the repository to a temporary workspace, executes the marked
+commands, and reports the block ID, file, line, runner, timeout, and result.
+Unmarked shell examples stay inert.
 
 SetupProof v0.1 runs from this source tree; packaged installs are not out yet.
 The source-tree GitHub Action is usable by this repository or vendored copies
