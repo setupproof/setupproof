@@ -49,6 +49,7 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 	for _, want := range []string{
 		"pull_request:",
 		"permissions:\n  contents: read",
+		"timeout-minutes: 10",
 		"uses: ./",
 		"cli-path: ${{ runner.temp }}/setupproof",
 		"mode: review",

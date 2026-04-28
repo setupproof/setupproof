@@ -97,12 +97,15 @@ func TestDiscoverShellAlias(t *testing.T) {
 	}
 }
 
-func TestDiscoverIgnoresUnmarkedAndUnsupportedBlocks(t *testing.T) {
+func TestDiscoverIgnoresUnmarkedAndReportsUnsupportedMarkedBlocks(t *testing.T) {
 	input := []byte("```sh\nnpm install\n```\n\n```python setupproof id=script\nprint('no')\n```\n")
 
 	blocks := Discover("README.md", input)
-	if len(blocks) != 0 {
-		t.Fatalf("expected no blocks, got %#v", blocks)
+	if len(blocks) != 1 {
+		t.Fatalf("expected 1 marked unsupported block, got %#v", blocks)
+	}
+	if blocks[0].Language != "python" || blocks[0].Shell != "" {
+		t.Fatalf("unsupported block = %#v", blocks[0])
 	}
 }
 
@@ -119,8 +122,11 @@ func TestHTMLCommentMarkerAppliesOnlyToNextFence(t *testing.T) {
 	input := []byte("<!-- setupproof id=first -->\n```python\nprint('ignored')\n```\n\n```sh\nnpm test\n```\n")
 
 	blocks := Discover("README.md", input)
-	if len(blocks) != 0 {
-		t.Fatalf("expected no blocks, got %#v", blocks)
+	if len(blocks) != 1 {
+		t.Fatalf("expected unsupported marked block, got %#v", blocks)
+	}
+	if blocks[0].Language != "python" || blocks[0].Shell != "" || blocks[0].Metadata["id"] != "first" {
+		t.Fatalf("unsupported block = %#v", blocks[0])
 	}
 }
 

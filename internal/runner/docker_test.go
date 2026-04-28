@@ -390,6 +390,19 @@ func TestDockerContainerNameUsesRandomSuffix(t *testing.T) {
 	}
 }
 
+func TestDockerStateCWDValidationStaysInsideContainerWorkspace(t *testing.T) {
+	for _, cwd := range []string{"/workspace", "/workspace/docs", "/workspace/../workspace/subdir"} {
+		if err := validateContainerStateCWD(cwd); err != nil {
+			t.Fatalf("expected %s to be valid: %v", cwd, err)
+		}
+	}
+	for _, cwd := range []string{"/tmp", "/workspace/../tmp", "workspace"} {
+		if err := validateContainerStateCWD(cwd); err == nil {
+			t.Fatalf("expected %s to be rejected", cwd)
+		}
+	}
+}
+
 func TestDockerWorkspaceUsesUserCacheForDaemonVisibleMounts(t *testing.T) {
 	parent := t.TempDir()
 	t.Setenv("HOME", parent)

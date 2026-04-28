@@ -112,6 +112,7 @@ permissions:
 jobs:
   readme-quickstart:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       # Source-tree workflow: see docs/adr/0009-github-actions-checkout-strategy.md.
       - name: Checkout repository

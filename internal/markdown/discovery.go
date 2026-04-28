@@ -67,19 +67,19 @@ func Discover(file string, contents []byte) []Block {
 			}
 
 			if selected != nil {
-				if shell, ok := shellForLanguage(info.language); ok {
-					blocks = append(blocks, Block{
-						File:       file,
-						Line:       i + 1,
-						MarkerLine: selected.line,
-						Language:   normalizeLanguage(info.language),
-						Shell:      shell,
-						Text:       strings.Join(lines[contentStart:contentEnd], ""),
-						MarkerForm: selected.form,
-						Metadata:   copyMetadata(selected.metadata),
-						Warnings:   append([]string(nil), selected.warnings...),
-					})
-				}
+				language := normalizeLanguage(info.language)
+				shell, _ := shellForLanguage(language)
+				blocks = append(blocks, Block{
+					File:       file,
+					Line:       i + 1,
+					MarkerLine: selected.line,
+					Language:   language,
+					Shell:      shell,
+					Text:       strings.Join(lines[contentStart:contentEnd], ""),
+					MarkerForm: selected.form,
+					Metadata:   copyMetadata(selected.metadata),
+					Warnings:   append([]string(nil), selected.warnings...),
+				})
 			}
 
 			if contentEnd < len(lines) {

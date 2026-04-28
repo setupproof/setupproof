@@ -123,11 +123,14 @@ func TestBuildMixedRunnerReportsMixedWorkspace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.ExitCode != 0 {
+	if result.ExitCode != 2 {
 		t.Fatalf("exit code = %d, errors = %#v", result.ExitCode, result.Plan.ValidationErrors)
 	}
 	if result.Plan.Runner.Kind != "mixed" || result.Plan.Runner.Workspace != "mixed" || result.Plan.Runner.NetworkPolicy != "mixed" {
 		t.Fatalf("runner summary = %#v", result.Plan.Runner)
+	}
+	if !contains(result.Plan.ValidationErrors, "mixed runners in one execution are not implemented; pass --runner=local or --runner=docker for the whole run") {
+		t.Fatalf("validation errors = %#v", result.Plan.ValidationErrors)
 	}
 }
 
@@ -229,6 +232,39 @@ func TestBuildWarnsWhenBlocksAreMissingButNotRequired(t *testing.T) {
 	}
 }
 
+func TestBuildRejectsUnsupportedMarkedLanguage(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "README.md", "```zsh setupproof id=install\nnpm test\n```\n")
+	writeFile(t, dir, "setupproof.yml", `version: 1
+blocks:
+  - file: README.md
+    id: install
+    timeout: 90s
+`)
+
+	result, err := Build(Request{
+		CWD:              dir,
+		Positional:       []string{"README.md"},
+		HasRequireBlocks: true,
+		RequireBlocks:    true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ExitCode != 2 {
+		t.Fatalf("exit code = %d, errors = %#v", result.ExitCode, result.Plan.ValidationErrors)
+	}
+	if len(result.Plan.Blocks) != 0 {
+		t.Fatalf("blocks = %#v", result.Plan.Blocks)
+	}
+	if !contains(result.Plan.ValidationErrors, `README.md:1: marked block language "zsh" is not supported; use sh, bash, or shell`) {
+		t.Fatalf("validation errors = %#v", result.Plan.ValidationErrors)
+	}
+	if contains(result.Plan.ValidationErrors, "README.md#install: block config does not match any explicit marker id in selected file") {
+		t.Fatalf("unsupported marked block config was treated as unused: %#v", result.Plan.ValidationErrors)
+	}
+}
+
 func TestBuildRejectsNetworkFalseForLocalRunner(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "README.md", "```sh setupproof network=false\nnpm test\n```\n")
@@ -315,6 +351,38 @@ env:
 	}
 	if result.Plan.Env.Pass[1].Name != "SETUPPROOF_PRESENT_SECRET" || !result.Plan.Env.Pass[1].Present {
 		t.Fatalf("present env presence = %#v", result.Plan.Env.Pass[1])
+	}
+}
+
+func TestBuildRejectsInvalidAndDuplicateEnvironmentNames(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\ntrue\n```\n")
+	writeFile(t, dir, "setupproof.yml", `version: 1
+files:
+  - README.md
+env:
+  allow:
+    - 1BAD
+`)
+
+	_, err := Build(Request{CWD: dir})
+	if err == nil {
+		t.Fatal("expected invalid env name error")
+	}
+
+	writeFile(t, dir, "setupproof.yml", `version: 1
+files:
+  - README.md
+env:
+  allow:
+    - SETUPPROOF_DUP
+  pass:
+    - name: SETUPPROOF_DUP
+`)
+
+	_, err = Build(Request{CWD: dir})
+	if err == nil {
+		t.Fatal("expected duplicate env name error")
 	}
 }
 

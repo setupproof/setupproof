@@ -134,6 +134,28 @@ func TestLocalRunnerSharedStateAndFailureState(t *testing.T) {
 	}
 }
 
+func TestLocalRunnerDoesNotPersistCWDOutsideWorkspace(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=escape\n"+
+		"cd /tmp\n"+
+		"```\n\n"+
+		"```sh setupproof id=after\n"+
+		"test -f README.md\n"+
+		"```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, stdout, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstdout:\n%s\nstderr:\n%s", code, stdout, stderr)
+	}
+	if !blockLineContains(stdout, "README.md#after", "result=passed") {
+		t.Fatalf("later block did not run from workspace root:\n%s", stdout)
+	}
+	if !strings.Contains(stderr, "resolves outside the temporary workspace") {
+		t.Fatalf("stderr missing cwd warning:\n%s", stderr)
+	}
+}
+
 func TestLocalRunnerDoesNotShareStateAcrossTargetFiles(t *testing.T) {
 	dir := gitRepo(t)
 	writeFile(t, dir, "one.md", "```sh setupproof id=one\n"+
@@ -447,6 +469,19 @@ func TestSafeLocaleAllowlist(t *testing.T) {
 		if safeLocale(value) {
 			t.Fatalf("safeLocale(%q) = true", value)
 		}
+	}
+}
+
+func TestLocalStateCWDValidationRejectsOutsideSymlink(t *testing.T) {
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "repo"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(t.TempDir(), filepath.Join(root, "repo", "outside-link")); err != nil {
+		t.Skipf("symlink unavailable: %v", err)
+	}
+	if err := validateLocalStateCWD(filepath.Join(root, "repo", "outside-link"), filepath.Join(root, "repo")); err == nil {
+		t.Fatal("expected outside symlink cwd to be rejected")
 	}
 }
 

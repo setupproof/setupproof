@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -311,6 +312,9 @@ func runDockerBlock(ctx context.Context, block planning.Block, container *docker
 	}
 
 	nextState, err := readStateFiles(stateCWDLocal, stateEnvLocal, state)
+	if err == nil {
+		err = validateContainerStateCWD(nextState.cwd)
+	}
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: warning: could not capture shell state: %v\n", block.QualifiedID, err)
 		return blockOutcome{result: "passed", exitCode: 0}, state, true, output, elapsedMillis(started)
@@ -689,6 +693,17 @@ func containerPath(ws *workspace, localPath string) string {
 		return containerWorkspaceRoot
 	}
 	return containerWorkspaceRoot + "/" + filepath.ToSlash(rel)
+}
+
+func validateContainerStateCWD(cwd string) error {
+	cleaned := path.Clean(cwd)
+	if !path.IsAbs(cleaned) {
+		return fmt.Errorf("captured cwd %s is not an absolute container path", cwd)
+	}
+	if cleaned != containerWorkspaceRoot && !strings.HasPrefix(cleaned, containerWorkspaceRoot+"/") {
+		return fmt.Errorf("captured cwd %s resolves outside the container workspace", cwd)
+	}
+	return nil
 }
 
 func fileExists(path string) bool {

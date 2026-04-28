@@ -71,6 +71,7 @@ func suggestionFor(candidate markdown.Candidate) Suggestion {
 func riskFlags(text string) []string {
 	lower := strings.ToLower(text)
 	tokens := shellishTokens(lower)
+	originalTokens := shellishTokens(text)
 	seen := make(map[string]bool)
 	add := func(flag string) {
 		seen[flag] = true
@@ -120,6 +121,11 @@ func riskFlags(text string) []string {
 			add("requires-secrets")
 		}
 	}
+	for _, token := range originalTokens {
+		if looksLikeSecretEnvToken(token) {
+			add("requires-secrets")
+		}
+	}
 	for _, token := range tokens {
 		if strings.HasPrefix(token, "aws_") || strings.HasPrefix(token, "gcp_") || strings.HasPrefix(token, "azure_") {
 			add("requires-secrets")
@@ -137,7 +143,7 @@ func riskFlags(text string) []string {
 func shellishTokens(text string) []string {
 	fields := strings.FieldsFunc(text, func(r rune) bool {
 		return !(r == '_' || r == '-' || r == '.' || r == '/' || r == ':' ||
-			(r >= 'a' && r <= 'z') || (r >= '0' && r <= '9'))
+			(r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'))
 	})
 	tokens := make([]string, 0, len(fields))
 	for _, field := range fields {
@@ -151,6 +157,24 @@ func shellishTokens(text string) []string {
 		}
 	}
 	return tokens
+}
+
+func looksLikeSecretEnvToken(token string) bool {
+	token = strings.Trim(token, "{}")
+	if token == "" || token != strings.ToUpper(token) {
+		return false
+	}
+	if strings.ContainsAny(token, "/:.") {
+		return false
+	}
+	parts := strings.Split(token, "_")
+	for _, part := range parts {
+		switch part {
+		case "TOKEN", "SECRET", "PASSWORD", "APIKEY":
+			return true
+		}
+	}
+	return strings.Contains(token, "API_KEY") || strings.Contains(token, "ACCESS_KEY")
 }
 
 func pathBase(value string) string {

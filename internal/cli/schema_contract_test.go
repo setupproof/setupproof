@@ -54,7 +54,7 @@ func TestJSONOutputsMatchPublishedSchemas(t *testing.T) {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		code := Run([]string{"--dry-run", "--json", "README.md"}, &stdout, &stderr)
-		if code != 0 {
+		if code != 2 {
 			t.Fatalf("exit code = %d, stderr = %q", code, stderr.String())
 		}
 		validateJSONSchema(t, "schemas/setupproof-plan.schema.json", stdout.Bytes())

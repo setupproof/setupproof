@@ -332,6 +332,9 @@ func runBlock(ctx context.Context, block planning.Block, ws *workspace, state fi
 	}
 
 	nextState, err := readStateFiles(stateCWD, stateEnv, state)
+	if err == nil {
+		err = validateLocalStateCWD(nextState.cwd, ws.repoRoot)
+	}
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: warning: could not capture shell state: %v\n", block.QualifiedID, err)
 		return blockOutcome{result: "passed", exitCode: 0}, state, result.output, elapsedMillis(started)
@@ -525,6 +528,21 @@ func readStateFiles(cwdPath string, envPath string, previous fileState) (fileSta
 		return previous, fmt.Errorf("captured environment was empty")
 	}
 	return fileState{cwd: cwd, env: env}, nil
+}
+
+func validateLocalStateCWD(cwd string, repoRoot string) error {
+	root, err := filepath.EvalSymlinks(repoRoot)
+	if err != nil {
+		return err
+	}
+	evaluated, err := filepath.EvalSymlinks(cwd)
+	if err != nil {
+		return fmt.Errorf("captured cwd %s could not be resolved: %w", cwd, err)
+	}
+	if !pathInside(root, evaluated) {
+		return fmt.Errorf("captured cwd %s resolves outside the temporary workspace", cwd)
+	}
+	return nil
 }
 
 func parseNullEnv(data []byte) []string {

@@ -211,6 +211,7 @@ func Build(req Request) (Result, error) {
 	targetFiles := targetFileSet(targets)
 	usedBlockConfigs := make(map[string]bool)
 	explicitIDs := make(map[string]map[string]bool)
+	markedBlockCount := 0
 	for _, target := range targets {
 		plan.Files = append(plan.Files, target.Rel)
 		contents, err := os.ReadFile(target.Abs)
@@ -219,6 +220,7 @@ func Build(req Request) (Result, error) {
 		}
 		discovered := markdown.Discover(target.Rel, contents)
 		for _, discoveredBlock := range discovered {
+			markedBlockCount++
 			for _, warning := range discoveredBlock.Warnings {
 				plan.Warnings = append(plan.Warnings, fmt.Sprintf("%s:%d: %s", target.Rel, discoveredBlock.MarkerLine, warning))
 			}
@@ -248,6 +250,10 @@ func Build(req Request) (Result, error) {
 					usedBlockConfigs[configKey] = true
 				}
 			}
+			if discoveredBlock.Shell == "" {
+				plan.ValidationErrors = append(plan.ValidationErrors, unsupportedMarkedLanguageError(target.Rel, discoveredBlock))
+				continue
+			}
 			state, optionErrors, optionWarnings := applyInlineMetadata(state, discoveredBlock.Metadata, target.Rel, blockID)
 			plan.ValidationErrors = append(plan.ValidationErrors, optionErrors...)
 			plan.Warnings = append(plan.Warnings, optionWarnings...)
@@ -276,7 +282,7 @@ func Build(req Request) (Result, error) {
 	}
 	plan.ValidationErrors = append(plan.ValidationErrors, unusedBlockConfigErrors(blockConfigEntries, targetFiles, usedBlockConfigs)...)
 
-	if len(plan.Blocks) == 0 {
+	if len(plan.Blocks) == 0 && markedBlockCount == 0 {
 		message := "no marked blocks found"
 		if requireBlocks {
 			plan.ValidationErrors = append(plan.ValidationErrors, message)
@@ -284,7 +290,10 @@ func Build(req Request) (Result, error) {
 			plan.Warnings = append(plan.Warnings, message)
 		}
 	}
-	if len(plan.ValidationErrors) == 0 {
+	if err := validateSingleExecutionRunner(plan.Blocks); err != nil {
+		plan.ValidationErrors = append(plan.ValidationErrors, err.Error())
+	}
+	if len(plan.Blocks) > 0 {
 		plan.Runner = summarizeRunner(defaultPlanOptions, plan.Blocks)
 	}
 
@@ -292,7 +301,7 @@ func Build(req Request) (Result, error) {
 	if len(plan.ValidationErrors) > 0 {
 		exitCode = 2
 	}
-	if requireBlocks && len(plan.Blocks) == 0 {
+	if requireBlocks && len(plan.Blocks) == 0 && markedBlockCount == 0 {
 		exitCode = 4
 	}
 
@@ -377,6 +386,9 @@ func validateConfigReferences(cfg config.Config, resolver project.Resolver) erro
 		if pass.Name == "" {
 			return fmt.Errorf("env.pass entries must include name")
 		}
+	}
+	if err := validateConfigEnv(cfg); err != nil {
+		return err
 	}
 	return nil
 }
@@ -465,6 +477,55 @@ func unusedBlockConfigErrors(entries []blockConfigEntry, targetFiles map[string]
 		errors = append(errors, fmt.Sprintf("%s#%s: block config does not match any explicit marker id in selected file", entry.File, entry.ID))
 	}
 	return errors
+}
+
+func unsupportedMarkedLanguageError(file string, block markdown.Block) string {
+	if block.Language == "" {
+		return fmt.Sprintf("%s:%d: marked block must use a supported shell language; use sh, bash, or shell", file, block.Line)
+	}
+	return fmt.Sprintf("%s:%d: marked block language %q is not supported; use sh, bash, or shell", file, block.Line, block.Language)
+}
+
+func validateConfigEnv(cfg config.Config) error {
+	seen := make(map[string]string)
+	for _, name := range cfg.Env.Allow {
+		if err := validateEnvName("env.allow", name); err != nil {
+			return err
+		}
+		if previous := seen[name]; previous != "" {
+			return fmt.Errorf("environment variable %s appears more than once (%s and env.allow)", name, previous)
+		}
+		seen[name] = "env.allow"
+	}
+	for _, pass := range cfg.Env.Pass {
+		if err := validateEnvName("env.pass", pass.Name); err != nil {
+			return err
+		}
+		if previous := seen[pass.Name]; previous != "" {
+			return fmt.Errorf("environment variable %s appears more than once (%s and env.pass)", pass.Name, previous)
+		}
+		seen[pass.Name] = "env.pass"
+	}
+	return nil
+}
+
+func validateEnvName(section string, name string) error {
+	if name == "" {
+		return fmt.Errorf("%s entries must include name", section)
+	}
+	for i := 0; i < len(name); i++ {
+		ch := name[i]
+		if i == 0 {
+			if ch != '_' && !((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+				return fmt.Errorf("%s entry %q must match [A-Za-z_][A-Za-z0-9_]*", section, name)
+			}
+			continue
+		}
+		if ch != '_' && !((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9')) {
+			return fmt.Errorf("%s entry %q must match [A-Za-z_][A-Za-z0-9_]*", section, name)
+		}
+	}
+	return nil
 }
 
 func defaultOptions(req Request, cfg *config.Config) (optionState, bool, error) {
@@ -767,6 +828,19 @@ func summarizeRunner(defaultOptions Options, blocks []Block) Runner {
 		}
 	}
 	return first
+}
+
+func validateSingleExecutionRunner(blocks []Block) error {
+	if len(blocks) < 2 {
+		return nil
+	}
+	first := blocks[0].Options.Runner
+	for _, block := range blocks[1:] {
+		if block.Options.Runner != first {
+			return fmt.Errorf("mixed runners in one execution are not implemented; pass --runner=local or --runner=docker for the whole run")
+		}
+	}
+	return nil
 }
 
 func planEnv(cfg *config.Config) Env {

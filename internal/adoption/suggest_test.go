@@ -62,6 +62,22 @@ func TestSuggestAvoidsCommonKeywordCollisions(t *testing.T) {
 	}
 }
 
+func TestSuggestFlagsCommonSecretEnvironmentVariables(t *testing.T) {
+	dir := t.TempDir()
+	writeAdoptionFile(t, dir, "README.md", "```sh\nprintf '%s\\n' \"$GITHUB_TOKEN\" \"$API_TOKEN\" \"$SECRET_KEY\"\n```\n")
+
+	suggestions, err := Suggest(planning.Request{CWD: dir, Positional: []string{"README.md"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(suggestions) != 1 {
+		t.Fatalf("suggestions = %#v", suggestions)
+	}
+	if !hasRisk(suggestions[0].RiskFlags, "requires-secrets") {
+		t.Fatalf("risk flags = %#v", suggestions[0].RiskFlags)
+	}
+}
+
 func TestCleanInitFileRejectsNewlines(t *testing.T) {
 	if _, err := cleanInitFile("README.md\n.github/workflows/bad.yml"); err == nil {
 		t.Fatal("expected newline in init file path to be rejected")
