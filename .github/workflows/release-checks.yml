@@ -2,23 +2,6 @@ name: Release Checks
 
 on:
   pull_request:
-    paths:
-      - ".github/dependabot.yml"
-      - ".github/workflows/release-checks.yml"
-      - ".github/pull_request_template.md"
-      - "action.yml"
-      - "cmd/**"
-      - "CONTRIBUTING.md"
-      - "docs/**"
-      - "examples/**"
-      - "go.mod"
-      - "go.sum"
-      - "internal/**"
-      - "scripts/**"
-      - "schemas/**"
-      - "Makefile"
-      - "README.md"
-      - "SUPPORT.md"
   push:
     branches:
       - main
