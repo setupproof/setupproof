@@ -2,16 +2,35 @@
 
 [![SetupProof](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml/badge.svg)](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml)
 
-Verify marked README quickstarts in a clean temporary workspace.
+Test marked README quickstarts from a clean workspace before contributors hit
+them.
 
-Setup instructions drift.
-
-SetupProof is for maintainers who want setup instructions to fail in CI before
-users copy them.
+Setup docs drift because normal CI checks the code, not the commands people
+copy from the README. SetupProof gives maintainers a small, explicit check for
+that boundary: mark the shell block you expect to keep working, then run the
+same block locally or in CI.
 
 ![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
 
-Mark the README shell block that should keep working:
+## Install
+
+Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
+
+```sh
+go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0
+setupproof --version
+```
+
+From a source checkout:
+
+```sh
+make build
+./setupproof --version
+```
+
+## Use It
+
+Mark a README shell block that should stay runnable:
 
 ````md
 <!-- setupproof id=quickstart -->
@@ -20,64 +39,82 @@ go test ./...
 ```
 ````
 
-Then review and run only the marked blocks:
+Review the plan without executing commands:
 
 ```sh
-go run ./cmd/setupproof review README.md
-go run ./cmd/setupproof --require-blocks --no-color --no-glyphs README.md
+setupproof review README.md
 ```
 
-SetupProof copies the repository to a temporary workspace, executes the marked
-commands, and reports the block ID, file, line, runner, timeout, and result.
+Run the marked blocks:
+
+```sh
+setupproof --require-blocks --no-color --no-glyphs README.md
+```
+
+Typical output is intentionally plain:
+
+```text
+[passed] README.md#quickstart file=README.md:12 runner=local timeout=120s result=passed
+```
+
 Unmarked shell examples stay inert.
-
-SetupProof v0.1 runs from this source tree; packaged installs are not out yet.
-The source-tree GitHub Action is usable by this repository or vendored copies
-with a locally built CLI. Public package-manager installs and external Action
-tag examples are deferred until release packaging exists.
-
-## Try It Locally
-
-From this source checkout, build the CLI:
-
-```sh
-go build -o ./setupproof ./cmd/setupproof
-```
-
-Then run the binary from any Git repository with Markdown setup docs:
-
-```sh
-/path/to/setupproof init
-/path/to/setupproof review README.md
-/path/to/setupproof --require-blocks --no-color --no-glyphs README.md
-```
-
-This is the v0.1 source-tree path. Package-manager installs, public external
-Action tags, native Windows execution, and PowerShell fenced blocks are not
-available yet.
 
 ## Adopt It
 
-Create the default config without prompts:
+Create the default config:
 
 ```sh
-go run ./cmd/setupproof init
+setupproof init
 ```
 
-That writes `setupproof.yml` with `README.md` as the only default target,
-`defaults.requireBlocks: true`, the local runner, a 120 second timeout, and no
-secret environment passthrough. It refuses to overwrite existing files unless
-you pass `--force`.
+That writes `setupproof.yml` with `README.md` as the default target, the local
+runner, a 120 second timeout, `defaults.requireBlocks: true`, and no secret
+environment passthrough. Existing files are not overwritten unless `--force` is
+passed.
 
 Use non-executing inspection while adding markers:
 
 ```sh
-go run ./cmd/setupproof --list README.md
-go run ./cmd/setupproof review README.md
-go run ./cmd/setupproof --dry-run --json --require-blocks README.md
+setupproof suggest README.md
+setupproof --list README.md
+setupproof review README.md
+setupproof --dry-run --json --require-blocks README.md
 ```
 
-Unmarked Markdown shell blocks never execute as SetupProof targets.
+## GitHub Actions
+
+Pin both the Action and CLI version:
+
+```yaml
+name: SetupProof
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  readme-quickstart:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: setupproof/setupproof@v0.1.0
+        with:
+          cli-version: v0.1.0
+          mode: review
+          require-blocks: "true"
+          files: README.md
+      - uses: setupproof/setupproof@v0.1.0
+        with:
+          cli-version: v0.1.0
+          require-blocks: "true"
+          files: README.md
+```
 
 ## Safety Model
 
@@ -85,7 +122,7 @@ Unmarked Markdown shell blocks never execute as SetupProof targets.
   execute commands.
 - Execution uses a copied temporary workspace, not the live working directory.
 - Local and Action runners are trusted-code runners.
-- Docker improves isolation but is not a perfect sandbox.
+- Docker improves isolation but is not a security sandbox.
 - No telemetry. No update checks.
 - Secrets pass only when configured.
 
@@ -95,13 +132,13 @@ Coding agents should treat SetupProof markers as the authoritative runnable
 quickstart surface:
 
 ```sh
-go run ./cmd/setupproof --list README.md
-go run ./cmd/setupproof review README.md
-go run ./cmd/setupproof --dry-run --json --require-blocks README.md
-go run ./cmd/setupproof --require-blocks --no-color --no-glyphs README.md
+setupproof --list README.md
+setupproof review README.md
+setupproof --dry-run --json --require-blocks README.md
+setupproof --require-blocks --no-color --no-glyphs README.md
 ```
 
-Do not execute unmarked Markdown shell blocks as SetupProof targets. See
+Never execute unmarked Markdown shell blocks as SetupProof targets. See
 `docs/AGENT_USAGE.md` and `llms.txt` for the full agent contract.
 
 ## Demos And Docs
@@ -112,24 +149,15 @@ Do not execute unmarked Markdown shell blocks as SetupProof targets. See
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
 - `docs/AGENT_USAGE.md` defines the recommended workflow for coding agents.
-- `docs/INSTALL.md` shows current CI and platform guidance without package
-  distribution claims.
-- `docs/RELEASE_READINESS.md` lists gates before publishing external
-  distribution instructions.
+- `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
+- `docs/RELEASE_READINESS.md` lists release checks.
 - `schemas/` contains plan, report, and `setupproof.yml` JSON Schemas.
 - `examples/` contains Node, Python, Docker Compose, monorepo, Go, and Rust
   fixtures.
 - `SUPPORT.md` lists the information maintainers should include when reporting
   a setup-doc verification issue.
 
-## License
-
-SetupProof is licensed under the Apache License, Version 2.0 (`Apache-2.0`).
-See `LICENSE` and `NOTICE`.
-
 ## Repository Checks
-
-For normal repository validation:
 
 ```sh
 make check
@@ -141,7 +169,13 @@ For release-oriented changes, also run:
 make staticcheck
 make vuln
 make actionlint
+make release-archives
 ```
+
+## License
+
+SetupProof is licensed under the Apache License, Version 2.0 (`Apache-2.0`).
+See `LICENSE` and `NOTICE`.
 
 ## Repository Dogfood
 

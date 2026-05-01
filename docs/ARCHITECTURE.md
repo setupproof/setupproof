@@ -78,5 +78,5 @@ Changes to workspace copy, process cleanup, stream capture, redaction, timeout
 handling, or Docker behavior should include focused runner tests and a race-test
 run.
 
-Changes to public docs should keep source-tree packaging claims honest until
-external distribution exists.
+Changes to public docs should keep release-channel claims tied to channels that
+are actually published and tested.

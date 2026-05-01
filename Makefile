@@ -1,7 +1,7 @@
 VERSION ?= 0.1.0
 LDFLAGS := -X github.com/setupproof/setupproof/internal/app.Version=$(VERSION)
 
-.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples launch-polish check staticcheck vuln actionlint
+.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples launch-polish check staticcheck vuln actionlint release-archives
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o ./setupproof ./cmd/setupproof
@@ -49,3 +49,6 @@ vuln:
 
 actionlint:
 	go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/setupproof.yml
+
+release-archives:
+	scripts/package-release.sh v$(VERSION)

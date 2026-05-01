@@ -6,7 +6,9 @@ in `docs/adr/`.
 ## Runtime
 
 SetupProof uses a Go CLI. The GitHub Action is a composite Action that invokes
-the CLI. Public package distribution is deferred until release packaging exists.
+the CLI. v0.1.0 is distributed through `go install`, GitHub release archives,
+and a pinned composite Action. npm and operating-system package managers remain
+deferred until their package checks exist.
 
 ## Markers
 
@@ -28,9 +30,10 @@ CI context, while normal CLI runs default to `local`.
 
 ## GitHub Actions Checkout
 
-The source-tree workflow uses a minimal inline `git init`/`fetch` checkout
-instead of an external Action until release packaging exists. ADR 0009 records
-the tradeoffs and required workflow shape.
+The released Action uses normal workflow checkout and downloads the pinned CLI
+archive declared by `cli-version`. The source-tree workflow remains available
+for this repository and vendored copies. ADR 0009 records the earlier bootstrap
+tradeoff and the source-tree workflow shape.
 
 ## Shell Execution
 
