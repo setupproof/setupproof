@@ -7,6 +7,7 @@
 !/.github/**
 !/.gitignore
 /coverage.out
+/dist/
 /report.json
 /report.md
 /setupproof-report.json

@@ -40,3 +40,7 @@ repository root contains the source-tree files the workflow needs.
   adapt the source-tree workflow knowingly.
 - When immutable SetupProof Action tags are published, public docs can switch
   to the standard checkout guidance appropriate for that release channel.
+
+v0.1.0 public docs now use the released Action path. The source-tree workflow
+remains available for SetupProof itself and repositories that vendor the Action
+files intentionally.

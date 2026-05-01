@@ -36,6 +36,11 @@ empty. The composite Action will:
 - write a bounded step summary;
 - exit with the same failure semantics as the CLI.
 
+As of v0.1.0, release archives exist for Linux and macOS on `amd64` and
+`arm64`, and public Action examples pin both the Action tag and `cli-version`.
+The default `cli-version` remains empty so future source-tree usage does not
+silently download an older release.
+
 Generated workflow examples must use `pull_request`, `push` for the default
 branch, `permissions: contents: read`, no repository secrets, and
 `--require-blocks`.

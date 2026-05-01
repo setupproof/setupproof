@@ -1,16 +1,37 @@
 # Install And CI
 
-SetupProof v0.1 runs from this source tree. Packaged installs and external
-Action tag examples will be documented after release packaging exists.
+SetupProof v0.1.0 ships as a Go module, GitHub release archives, and a
+versioned composite GitHub Action. npm, Homebrew, winget, Chocolatey, and Scoop
+packages are not published yet.
 
-The CI examples below assume a `setupproof` executable is already available on
-`PATH`, except for the GitHub Actions source-tree example, which builds the CLI
-from this repository and passes it to the local Action with `cli-path`.
+## Go Install
 
-## Source Tree
+Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
 
-Prerequisites: Go, Git, and a POSIX shell. From this repository or a vendored
-copy:
+```sh
+go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0
+setupproof --version
+setupproof review README.md
+setupproof --require-blocks --no-color --no-glyphs README.md
+```
+
+## Release Archives
+
+The GitHub release publishes Linux and macOS archives for `amd64` and `arm64`.
+Each archive contains the `setupproof` binary plus license files. Verify the
+archive with the matching checksum manifest before running it.
+
+Archive names:
+
+- `setupproof_0.1.0_linux_amd64.tar.gz`
+- `setupproof_0.1.0_linux_arm64.tar.gz`
+- `setupproof_0.1.0_darwin_amd64.tar.gz`
+- `setupproof_0.1.0_darwin_arm64.tar.gz`
+- `setupproof_0.1.0_checksums.txt`
+
+## Source Checkout
+
+From this repository:
 
 ```sh
 make build
@@ -20,7 +41,8 @@ make build
 ```
 
 Use `make build VERSION=<tag>` when building a release binary from a tagged
-checkout.
+checkout. Use `make release-archives VERSION=0.1.0` to build the release
+archive set locally.
 
 For a new project, `setupproof init` writes only `setupproof.yml` by default.
 Use `setupproof init --workflow` only from this source tree, or from a
@@ -40,9 +62,7 @@ repository secrets to the job by default. The run step executes marked commands
 from the pull request, so treat it like running the project test suite against
 untrusted code.
 
-This source-tree snippet is for this repository or a repository that has
-vendored the SetupProof Action files at its root. Public external Action tags
-will be documented only after immutable release packaging exists.
+Pin the Action tag and the downloaded CLI version together.
 
 <!-- ci-snippet:github-actions -->
 ```yaml
@@ -62,28 +82,16 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      # Source-tree workflow: see docs/adr/0009-github-actions-checkout-strategy.md.
-      - name: Checkout repository
-        shell: bash
-        run: |
-          git init .
-          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
-          git fetch --depth=1 origin "$GITHUB_SHA"
-          git checkout --detach FETCH_HEAD
-      - name: Build SetupProof CLI
-        shell: bash
-        run: go build -o "$RUNNER_TEMP/setupproof" ./cmd/setupproof
-      - name: Review marked quickstarts
-        uses: ./
+      - uses: actions/checkout@v4
+      - uses: setupproof/setupproof@v0.1.0
         with:
-          cli-path: ${{ runner.temp }}/setupproof
+          cli-version: v0.1.0
           mode: review
           require-blocks: "true"
           files: README.md
-      - name: Run marked quickstarts
-        uses: ./
+      - uses: setupproof/setupproof@v0.1.0
         with:
-          cli-path: ${{ runner.temp }}/setupproof
+          cli-version: v0.1.0
           require-blocks: "true"
           files: README.md
 ```
@@ -178,8 +186,14 @@ blocks.
 
 ## Distribution Status
 
+Published for v0.1.0:
+
+- Go install from the public module path.
+- Linux and macOS release archives with checksums.
+- Versioned GitHub Action usage with `cli-version: v0.1.0`.
+
 Deferred until implemented and verified:
 
 - npm package distribution.
 - Homebrew, winget, Chocolatey, and Scoop packages.
-- Stable external GitHub Action tags and Marketplace listing.
+- GitHub Marketplace listing.

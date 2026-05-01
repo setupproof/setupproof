@@ -1,13 +1,12 @@
 # Support
 
-SetupProof v0.1 runs from this source tree. Packaged installs and external
-Action tag examples are not published yet.
+SetupProof v0.1.0 can run from the Go module install path, release archives, a
+source checkout, or the pinned GitHub Action.
 
 For help with a SetupProof run, include:
 
 - the command you ran;
-- `setupproof --version`, or `go run ./cmd/setupproof --version` when running
-  from source;
+- `setupproof --version`;
 - operating system and architecture;
 - runner (`local`, `action-local`, or `docker`);
 - the relevant marked block ID and file path;

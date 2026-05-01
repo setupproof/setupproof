@@ -67,12 +67,15 @@ assert_contains "$DOC" "<!-- ci-snippet:generic-shell -->"
 assert_contains "$DOC" "Native Windows execution is unsupported in v0.1"
 assert_contains "$DOC" "PowerShell fenced blocks are unsupported in v0.1"
 assert_contains "$DOC" "WSL2"
+assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0"
+assert_contains "$DOC" "setupproof_0.1.0_checksums.txt"
 assert_contains "$DOC" "setupproof review README.md"
 assert_contains "$DOC" "setupproof --report-json setupproof-report.json --require-blocks --no-color --no-glyphs README.md"
 assert_contains "$DOC" "require-blocks: \"true\""
 assert_contains "$ROOT/LICENSE" "Apache License"
 assert_contains "$ROOT/NOTICE" "Licensed under the Apache License, Version 2.0."
 assert_contains "$ROOT/README.md" 'Apache License, Version 2.0 (`Apache-2.0`)'
+assert_contains "$ROOT/README.md" "setupproof/setupproof@v0.1.0"
 assert_contains "$ROOT/llms.txt" 'Apache License, Version 2.0 (`Apache-2.0`)'
 assert_contains "$ROOT/examples/node-npm/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/package.json" '"license": "Apache-2.0"'
@@ -104,7 +107,8 @@ assert_contains "$ROOT/docs/AGENT_USAGE.md" "setupproof --dry-run --json --requi
 assert_contains "$ROOT/docs/AGENT_USAGE.md" "schemas/setupproof-plan.schema.json"
 assert_contains "$ROOT/docs/AGENT_USAGE.md" "schemas/setupproof-report.schema.json"
 assert_contains "$ROOT/docs/AGENT_USAGE.md" "schemas/setupproof-config.schema.json"
-assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Stable external GitHub Action tags"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Moving major Action tags"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-archives"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "CODE_OF_CONDUCT.md"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "The SetupProof workflow is green on"
 assert_contains "$ROOT/.github/repository-metadata.yml" "github-actions"
