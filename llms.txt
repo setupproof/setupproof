@@ -1,0 +1,74 @@
+# SetupProof
+
+> SetupProof verifies explicitly marked README shell quickstarts in a copied temporary workspace.
+
+SetupProof is for maintainers and coding agents that need to distinguish
+author-approved setup commands from incidental shell examples in Markdown.
+
+Only marked shell blocks are execution targets. Unmarked shell blocks are
+informational unless a maintainer marks them.
+
+Marker forms:
+
+- HTML comment before a fenced block: `<!-- setupproof id=quickstart -->`
+- Info string marker: ```` ```sh setupproof id=quickstart ````
+
+## Recommended agent workflow
+
+Discover marked targets without execution:
+
+```sh
+setupproof --list README.md
+```
+
+Review exact execution semantics without execution:
+
+```sh
+setupproof review README.md
+```
+
+Read the machine plan without execution:
+
+```sh
+setupproof --dry-run --json --require-blocks README.md
+```
+
+Execute only after review:
+
+```sh
+setupproof --require-blocks --no-color --no-glyphs README.md
+```
+
+Never execute unmarked Markdown shell blocks as SetupProof targets.
+
+Non-executing commands are `suggest`, `review`, `doctor`, `--list`, and
+`--dry-run --json`.
+
+Exit codes:
+
+- `0`: passed, or no-op when blocks are not required.
+- `1`: one or more marked blocks failed or timed out.
+- `2`: usage, config, validation, or target selection error.
+- `3`: runner infrastructure error.
+- `4`: `--require-blocks` was set and no marked blocks were found.
+
+## Core Docs
+
+- [README](README.md): Quick product overview and local source-tree usage.
+- [Agent Usage](docs/AGENT_USAGE.md): Agent protocol and automation rules.
+- [Install And CI](docs/INSTALL.md): Current CI examples and platform support.
+- [Decisions](docs/DECISIONS.md): Public behavior and contract decisions.
+- [Comparison](docs/COMPARISON.md): How SetupProof differs from notebook-style Markdown runners.
+
+## Schemas
+
+- [Plan JSON Schema](schemas/setupproof-plan.schema.json): `--dry-run --json` output contract.
+- [Report JSON Schema](schemas/setupproof-report.schema.json): execution report output contract.
+- [Config JSON Schema](schemas/setupproof-config.schema.json): `setupproof.yml` editor and validation contract.
+
+## Optional
+
+- [Examples](examples/README.md): Small fixtures for Node, Python, Docker Compose, monorepo, Go, and Rust.
+- [Support](SUPPORT.md): Information to include in support requests.
+- [Security](SECURITY.md): Execution model and pull request safety notes.
+- [License](LICENSE): Apache License, Version 2.0 (`Apache-2.0`).

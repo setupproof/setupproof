@@ -1,0 +1,27 @@
+- name: bug
+  color: d73a4a
+  description: Something is not working as intended.
+- name: docs
+  color: 0075ca
+  description: Documentation or examples.
+- name: design needed
+  color: d876e3
+  description: Needs behavior or compatibility discussion before implementation.
+- name: good first issue
+  color: 7057ff
+  description: Small, focused work suitable for a first contribution.
+- name: runner
+  color: 0e8a16
+  description: Local, Action, Docker, timeout, or workspace execution behavior.
+- name: schema
+  color: fbca04
+  description: Plan, report, or config JSON Schema contract.
+- name: platform
+  color: c5def5
+  description: OS, shell, Docker, or CI platform support.
+- name: security
+  color: b60205
+  description: Security-sensitive behavior or disclosure coordination.
+- name: support
+  color: 5319e7
+  description: Questions, troubleshooting, and setup-doc verification help.

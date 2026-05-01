@@ -1,0 +1,14 @@
+description: Test marked README quickstarts from a clean workspace before new contributors hit them.
+homepage: ""
+topics:
+  - setup
+  - documentation
+  - markdown
+  - ci
+  - go
+  - github-actions
+  - cli
+  - testing
+  - developer-tools
+  - quickstart
+  - readme

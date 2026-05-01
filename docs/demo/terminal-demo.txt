@@ -1,0 +1,46 @@
+SetupProof terminal demo
+project: temporary Git repository
+
+$ setupproof suggest README.md
+README.md:5
+  language: sh
+  confidence: high
+  reason: looks like a setup or verification command
+  risk flags: none
+  suggested canonical marker: <!-- setupproof id=test -->
+  next command: go test ./...
+
+$ setupproof --list README.md
+README.md:12 id=quickstart language=sh marker=html-comment
+
+$ setupproof review README.md
+README.md#quickstart
+  file: README.md
+  line: 12
+  block id: quickstart
+  runner: local
+  workspace copy mode: tracked-plus-modified
+  shell: sh
+  strict mode: true
+  stdin mode: closed
+  tty mode: false
+  state mode: shared
+  network policy: host
+  network enforced: false
+  timeout: 120s
+  timeout ms: 120000
+  environment variables: none
+  secret environment variables: none
+  report sinks: terminal
+  source:
+    printf 'install dependencies\n'
+    sleep 2
+    printf 'run tests\n'
+    test -f README.md
+
+$ setupproof --require-blocks --no-color --no-glyphs README.md
+install dependencies
+run tests
+[passed] README.md#quickstart file=README.md:12 runner=local timeout=120s result=passed
+
+Demo complete.

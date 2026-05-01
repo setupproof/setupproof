@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SetupProof Execution Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "setupproofVersion",
+    "startedAt",
+    "durationMs",
+    "result",
+    "exitCode",
+    "invocation",
+    "workspace",
+    "runner",
+    "files",
+    "warnings",
+    "blocks"
+  ],
+  "properties": {
+    "kind": { "const": "report" },
+    "schemaVersion": { "const": "1.0.0" },
+    "setupproofVersion": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "result": { "enum": ["passed", "failed", "error", "noop"] },
+    "exitCode": { "type": "integer", "minimum": 0 },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["args"],
+      "properties": {
+        "args": { "type": "array", "items": { "type": "string" } },
+        "configPath": { "type": "string" }
+      }
+    },
+    "workspace": { "$ref": "#/$defs/workspace" },
+    "runner": { "$ref": "#/$defs/runner" },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "qualifiedId",
+          "file",
+          "line",
+          "language",
+          "shell",
+          "source",
+          "strict",
+          "stdin",
+          "tty",
+          "stateMode",
+          "isolated",
+          "runner",
+          "timeout",
+          "timeoutMs",
+          "result",
+          "exitCode",
+          "durationMs",
+          "stdoutTail",
+          "stderrTail",
+          "truncated"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "qualifiedId": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "integer", "minimum": 1 },
+          "language": { "type": "string" },
+          "shell": { "type": "string" },
+          "source": { "type": "string" },
+          "strict": { "type": "boolean" },
+          "stdin": { "type": "string" },
+          "tty": { "type": "boolean" },
+          "stateMode": { "type": "string" },
+          "isolated": { "type": "boolean" },
+          "runner": { "type": "string" },
+          "dockerImage": { "type": "string" },
+          "timeout": { "type": "string" },
+          "timeoutMs": { "type": "integer", "minimum": 1 },
+          "result": { "enum": ["passed", "failed", "timeout", "error", "skipped"] },
+          "exitCode": { "type": "integer", "minimum": 0 },
+          "reason": { "type": "string" },
+          "interactiveCommand": { "type": "string" },
+          "cleanupCompleted": { "type": "boolean" },
+          "durationMs": { "type": "integer", "minimum": 0 },
+          "stdoutTail": { "type": "string" },
+          "stderrTail": { "type": "string" },
+          "truncated": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stdout", "stderr"],
+            "properties": {
+              "stdout": { "type": "boolean" },
+              "stderr": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "exitCode": { "const": 3 }
+        },
+        "required": ["exitCode"]
+      },
+      "then": {
+        "properties": {
+          "runner": {
+            "allOf": [
+              { "$ref": "#/$defs/runner" },
+              { "required": ["error"] }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "source", "includedUntracked"],
+      "properties": {
+        "mode": { "type": "string" },
+        "source": { "type": "string" },
+        "includedUntracked": { "type": "boolean" }
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "workspace", "networkPolicy", "networkEnforced"],
+      "properties": {
+        "kind": { "type": "string" },
+        "workspace": { "enum": ["temporary", "container", "mixed"] },
+        "networkPolicy": { "type": "string" },
+        "networkEnforced": { "type": "boolean" },
+        "error": { "$ref": "#/$defs/runnerError" }
+      }
+    },
+    "runnerError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "reason": {
+          "enum": [
+            "docker_unavailable",
+            "image_pull_failed",
+            "workspace_setup_failed",
+            "process_start_failed",
+            "shell_unavailable",
+            "cleanup_failed",
+            "signal",
+            "signal_interrupt",
+            "signal_terminate",
+            "unsupported_platform",
+            "other"
+          ]
+        }
+      }
+    }
+  }
+}

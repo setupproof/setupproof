@@ -1,0 +1,105 @@
+name: SetupProof
+description: Test marked README quickstarts from a clean workspace.
+
+inputs:
+  cli-version:
+    description: Optional exact SetupProof CLI version to download from a published release when cli-path is not provided.
+    required: false
+    default: ""
+  cli-sha256:
+    description: Optional SHA-256 digest for the downloaded CLI archive.
+    required: false
+    default: ""
+  cli-path:
+    description: Optional trusted path to an already built SetupProof CLI binary. The action runs this binary without re-verifying its provenance; ensure it was produced inside the workflow.
+    required: false
+    default: ""
+  files:
+    description: Newline-separated Markdown files to check.
+    required: false
+    default: README.md
+  mode:
+    description: Run marked blocks or review the execution plan.
+    required: false
+    default: run
+  config:
+    description: Optional setupproof.yml path.
+    required: false
+    default: ""
+  runner:
+    description: SetupProof runner to pass to the CLI.
+    required: false
+    default: action-local
+  timeout:
+    description: Optional block timeout.
+    required: false
+    default: ""
+  network:
+    description: Optional network policy, true or false.
+    required: false
+    default: ""
+  require-blocks:
+    description: Fail when no marked blocks are found.
+    required: false
+    default: "true"
+  fail-fast:
+    description: Stop after the first failing block in a file.
+    required: false
+    default: "false"
+  include-untracked:
+    description: Include untracked non-ignored files in the temporary workspace.
+    required: false
+    default: "false"
+  keep-workspace:
+    description: Keep temporary workspaces after execution.
+    required: false
+    default: "false"
+  report-json:
+    description: Optional JSON report path.
+    required: false
+    default: ""
+  report-file:
+    description: Optional Markdown report path.
+    required: false
+    default: ""
+  no-color:
+    description: Disable ANSI color in SetupProof output.
+    required: false
+    default: "true"
+  no-glyphs:
+    description: Use text states instead of glyphs in SetupProof output.
+    required: false
+    default: "true"
+
+outputs:
+  report-json:
+    description: Path to the SetupProof JSON report file.
+    value: ${{ steps.setupproof.outputs.report-json }}
+  report-file:
+    description: Path to the optional SetupProof Markdown report file.
+    value: ${{ steps.setupproof.outputs.report-file }}
+
+runs:
+  using: composite
+  steps:
+    - id: setupproof
+      shell: bash
+      env:
+        SETUPPROOF_INPUT_CLI_VERSION: ${{ inputs.cli-version }}
+        SETUPPROOF_INPUT_CLI_SHA256: ${{ inputs.cli-sha256 }}
+        SETUPPROOF_INPUT_CLI_PATH: ${{ inputs.cli-path }}
+        SETUPPROOF_INPUT_FILES: ${{ inputs.files }}
+        SETUPPROOF_INPUT_MODE: ${{ inputs.mode }}
+        SETUPPROOF_INPUT_CONFIG: ${{ inputs.config }}
+        SETUPPROOF_INPUT_RUNNER: ${{ inputs.runner }}
+        SETUPPROOF_INPUT_TIMEOUT: ${{ inputs.timeout }}
+        SETUPPROOF_INPUT_NETWORK: ${{ inputs.network }}
+        SETUPPROOF_INPUT_REQUIRE_BLOCKS: ${{ inputs.require-blocks }}
+        SETUPPROOF_INPUT_FAIL_FAST: ${{ inputs.fail-fast }}
+        SETUPPROOF_INPUT_INCLUDE_UNTRACKED: ${{ inputs.include-untracked }}
+        SETUPPROOF_INPUT_KEEP_WORKSPACE: ${{ inputs.keep-workspace }}
+        SETUPPROOF_INPUT_REPORT_JSON: ${{ inputs.report-json }}
+        SETUPPROOF_INPUT_REPORT_FILE: ${{ inputs.report-file }}
+        SETUPPROOF_INPUT_NO_COLOR: ${{ inputs.no-color }}
+        SETUPPROOF_INPUT_NO_GLYPHS: ${{ inputs.no-glyphs }}
+      run: '"$GITHUB_ACTION_PATH/scripts/github-action.sh"'

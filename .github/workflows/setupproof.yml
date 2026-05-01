@@ -1,0 +1,40 @@
+name: SetupProof
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  readme-quickstart:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      # Source-tree workflow: see docs/adr/0009-github-actions-checkout-strategy.md.
+      - name: Checkout repository
+        shell: bash
+        run: |
+          git init .
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Build SetupProof CLI
+        shell: bash
+        run: go build -o "$RUNNER_TEMP/setupproof" ./cmd/setupproof
+      - name: Review marked quickstarts
+        uses: ./
+        with:
+          cli-path: ${{ runner.temp }}/setupproof
+          mode: review
+          require-blocks: "true"
+          files: README.md
+      - name: Run marked quickstarts
+        uses: ./
+        with:
+          cli-path: ${{ runner.temp }}/setupproof
+          require-blocks: "true"
+          files: README.md

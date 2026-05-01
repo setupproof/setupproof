@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SetupProof Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "setupproofVersion",
+    "invocation",
+    "files",
+    "defaults",
+    "workspace",
+    "runner",
+    "warnings",
+    "blocks",
+    "env"
+  ],
+  "properties": {
+    "kind": { "const": "plan" },
+    "schemaVersion": { "const": "1.0.0" },
+    "setupproofVersion": { "type": "string" },
+    "invocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["args", "dryRun", "requireBlocks"],
+      "properties": {
+        "args": { "type": "array", "items": { "type": "string" } },
+        "configPath": { "type": "string" },
+        "dryRun": { "type": "boolean" },
+        "requireBlocks": { "type": "boolean" }
+      }
+    },
+    "files": { "type": "array", "items": { "type": "string" } },
+    "defaults": { "$ref": "#/$defs/options" },
+    "workspace": { "$ref": "#/$defs/workspace" },
+    "runner": { "$ref": "#/$defs/runner" },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "validationErrors": { "type": "array", "items": { "type": "string" } },
+    "blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "explicitId",
+          "qualifiedId",
+          "file",
+          "line",
+          "markerLine",
+          "language",
+          "shell",
+          "markerForm",
+          "metadata",
+          "source",
+          "options"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "explicitId": { "type": "boolean" },
+          "qualifiedId": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "integer", "minimum": 1 },
+          "markerLine": { "type": "integer", "minimum": 1 },
+          "language": { "type": "string" },
+          "shell": { "type": "string" },
+          "markerForm": { "type": "string" },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          },
+          "source": { "type": "string" },
+          "options": { "$ref": "#/$defs/options" }
+        }
+      }
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allow", "pass"],
+      "properties": {
+        "allow": { "type": "array", "items": { "type": "string" } },
+        "pass": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "secret", "required", "present"],
+            "properties": {
+              "name": { "type": "string" },
+              "secret": { "type": "boolean" },
+              "required": { "type": "boolean" },
+              "present": {
+                "type": "boolean",
+                "description": "Whether the host environment currently defines this variable. Values are never included."
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "source", "includedUntracked"],
+      "properties": {
+        "mode": { "type": "string" },
+        "source": { "type": "string" },
+        "includedUntracked": { "type": "boolean" }
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "workspace", "networkPolicy", "networkEnforced"],
+      "properties": {
+        "kind": { "type": "string" },
+        "workspace": { "enum": ["temporary", "container", "mixed"] },
+        "networkPolicy": { "type": "string" },
+        "networkEnforced": { "type": "boolean" }
+      }
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runner",
+        "timeout",
+        "timeoutMs",
+        "strict",
+        "isolated",
+        "stateMode",
+        "stdin",
+        "tty",
+        "networkPolicy",
+        "networkEnforced"
+      ],
+      "properties": {
+        "runner": { "type": "string" },
+        "dockerImage": { "type": "string" },
+        "timeout": { "type": "string" },
+        "timeoutMs": { "type": "integer", "minimum": 1 },
+        "strict": { "type": "boolean" },
+        "isolated": { "type": "boolean" },
+        "stateMode": { "type": "string" },
+        "stdin": { "type": "string" },
+        "tty": { "type": "boolean" },
+        "networkPolicy": { "type": "string" },
+        "networkEnforced": { "type": "boolean" }
+      }
+    }
+  }
+}
