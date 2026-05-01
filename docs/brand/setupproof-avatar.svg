@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">SetupProof avatar</title>
+  <desc id="desc">A terminal window with a verification checkmark</desc>
+  <rect width="1024" height="1024" fill="#f7f8f5"/>
+  <rect x="112" y="112" width="800" height="800" rx="120" fill="#111827"/>
+  <rect x="176" y="190" width="672" height="644" rx="52" fill="#0f172a" stroke="#e5e7eb" stroke-width="22"/>
+  <circle cx="244" cy="266" r="22" fill="#ef4444"/>
+  <circle cx="306" cy="266" r="22" fill="#f59e0b"/>
+  <circle cx="368" cy="266" r="22" fill="#22c55e"/>
+  <path d="M252 386 L322 442 L252 498" fill="none" stroke="#e5e7eb" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M382 498 H516" fill="none" stroke="#e5e7eb" stroke-width="42" stroke-linecap="round"/>
+  <path d="M316 586 L456 716 L736 382" fill="none" stroke="#14b8a6" stroke-width="74" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M316 586 L456 716 L736 382" fill="none" stroke="#99f6e4" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
