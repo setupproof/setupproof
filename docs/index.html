@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SetupProof</title>
+    <meta
+      name="description"
+      content="Test marked README quickstarts from a clean workspace before contributors hit them."
+    >
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23111827'/%3E%3Cpath d='M17 34l9 9 21-24' fill='none' stroke='%2386efac' stroke-width='7' stroke-linecap='square'/%3E%3C/svg%3E"
+    >
+    <meta property="og:title" content="SetupProof">
+    <meta
+      property="og:description"
+      content="README quickstart verification for maintainers."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://setupproof.github.io/setupproof/">
+    <meta
+      property="og:image"
+      content="https://setupproof.github.io/setupproof/social-preview.png"
+    >
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SetupProof">
+    <meta
+      name="twitter:description"
+      content="README quickstart verification for maintainers."
+    >
+    <meta
+      name="twitter:image"
+      content="https://setupproof.github.io/setupproof/social-preview.png"
+    >
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #111827;
+        --muted: #546179;
+        --paper: #f7f8f5;
+        --surface: #ffffff;
+        --line: #d9dfd4;
+        --teal: #0f766e;
+        --teal-dark: #134e4a;
+        --amber: #c27a1f;
+        --red: #b42318;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 18px clamp(20px, 4vw, 56px);
+        background: color-mix(in srgb, var(--paper) 92%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+        backdrop-filter: blur(18px);
+      }
+
+      .wordmark {
+        font-weight: 800;
+        letter-spacing: 0;
+        text-decoration: none;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        transition: color 160ms ease;
+      }
+
+      .nav-links a:hover {
+        color: var(--ink);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(460px, 0.9fr) minmax(480px, 1.1fr);
+        min-height: calc(74svh - 65px);
+        align-items: center;
+        gap: clamp(36px, 5vw, 80px);
+        padding: clamp(44px, 7vw, 96px) clamp(20px, 4vw, 56px);
+        overflow: hidden;
+      }
+
+      .hero-copy {
+        max-width: 560px;
+        animation: enter-copy 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        color: var(--teal-dark);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        margin-bottom: 18px;
+        font-size: clamp(56px, 6.2vw, 92px);
+        line-height: 0.88;
+        letter-spacing: 0;
+      }
+
+      .lede {
+        max-width: 520px;
+        margin-bottom: 30px;
+        color: #2f3a4a;
+        font-size: clamp(19px, 2.1vw, 25px);
+        line-height: 1.28;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--ink);
+        padding: 11px 18px;
+        font-size: 15px;
+        font-weight: 750;
+        text-decoration: none;
+        transition:
+          transform 160ms ease,
+          background 160ms ease,
+          color 160ms ease,
+          border-color 160ms ease;
+      }
+
+      .button.primary {
+        background: var(--ink);
+        color: #ffffff;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+      }
+
+      .button.secondary:hover {
+        border-color: var(--teal);
+        color: var(--teal-dark);
+      }
+
+      .demo {
+        margin: 0;
+        animation: enter-media 820ms cubic-bezier(0.2, 0.8, 0.2, 1) 80ms both;
+      }
+
+      .demo img {
+        display: block;
+        width: min(100%, 980px);
+        height: auto;
+        border: 1px solid #18212f;
+        background: #0f172a;
+        box-shadow: 0 26px 80px rgba(17, 24, 39, 0.18);
+      }
+
+      .demo figcaption {
+        max-width: 760px;
+        margin-top: 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .proof {
+        display: grid;
+        grid-template-columns: minmax(240px, 0.65fr) minmax(0, 1.35fr);
+        gap: clamp(28px, 5vw, 72px);
+        padding: clamp(56px, 8vw, 118px) clamp(20px, 4vw, 56px);
+        border-top: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .section-kicker {
+        margin: 0 0 12px;
+        color: var(--amber);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h2 {
+        max-width: 640px;
+        margin-bottom: 16px;
+        font-size: clamp(34px, 5vw, 64px);
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .proof p,
+      .workflow p {
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .terminal-pair {
+        display: grid;
+        gap: 18px;
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        border: 1px solid #1f2937;
+        background: #111827;
+        color: #e5e7eb;
+        padding: 20px;
+        font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+      }
+
+      code {
+        font-family: inherit;
+      }
+
+      .fail {
+        color: #fca5a5;
+      }
+
+      .pass {
+        color: #86efac;
+      }
+
+      .workflow {
+        padding: clamp(56px, 8vw, 110px) clamp(20px, 4vw, 56px);
+      }
+
+      .workflow-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+        gap: clamp(28px, 5vw, 72px);
+        align-items: start;
+      }
+
+      .steps {
+        display: grid;
+        gap: 0;
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr);
+        gap: 18px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .steps span {
+        color: var(--teal);
+        font-weight: 850;
+      }
+
+      .steps strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 19px;
+      }
+
+      .steps p {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .final {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        padding: clamp(34px, 5vw, 64px) clamp(20px, 4vw, 56px);
+        background: var(--ink);
+        color: #ffffff;
+      }
+
+      .final h2 {
+        margin-bottom: 8px;
+        font-size: clamp(32px, 5vw, 58px);
+      }
+
+      .final p {
+        margin-bottom: 0;
+        color: #cbd5e1;
+        font-size: 18px;
+      }
+
+      .final .button {
+        border-color: #ffffff;
+        color: #ffffff;
+        white-space: nowrap;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: none;
+      }
+
+      @keyframes enter-copy {
+        from {
+          opacity: 0;
+          transform: translateY(18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes enter-media {
+        from {
+          opacity: 0;
+          transform: translateX(22px) scale(0.985);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .proof,
+        .workflow-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 36px;
+        }
+
+        .demo img {
+          width: 100%;
+        }
+
+        .final {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 620px) {
+        .nav {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 10px;
+          position: static;
+        }
+
+        .nav-links {
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        h1 {
+          font-size: clamp(46px, 15vw, 64px);
+        }
+
+        .hero {
+          padding-bottom: 24px;
+        }
+
+        .proof {
+          padding-top: 28px;
+        }
+
+        .button {
+          width: 100%;
+        }
+
+        .steps li {
+          grid-template-columns: 32px minmax(0, 1fr);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 1ms !important;
+          scroll-behavior: auto !important;
+          transition-duration: 1ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="nav">
+      <a class="wordmark" href="#top">SetupProof</a>
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#proof">Proof</a>
+        <a href="#workflow">Workflow</a>
+        <a href="https://github.com/setupproof/setupproof">GitHub</a>
+        <a href="https://github.com/setupproof/setupproof/blob/main/docs/INSTALL.md">Docs</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">README quickstart verification</p>
+          <h1 id="hero-title">SetupProof</h1>
+          <p class="lede">
+            Test marked README quickstarts from a clean workspace before
+            contributors hit them.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/setupproof/setupproof#install">
+              Install
+            </a>
+            <a class="button secondary" href="https://github.com/setupproof/setupproof#github-actions">
+              GitHub Action
+            </a>
+          </div>
+        </div>
+
+        <figure class="demo">
+          <img
+            src="demo/setupproof.gif"
+            alt="Terminal demo showing SetupProof reviewing and running a marked README quickstart"
+            width="1040"
+            height="640"
+          >
+          <figcaption>
+            Review first, then run the marked block from a copied workspace.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="proof reveal" id="proof" aria-labelledby="proof-title">
+        <div>
+          <p class="section-kicker">What it catches</p>
+          <h2 id="proof-title">A broken README should fail in CI.</h2>
+          <p>
+            SetupProof runs the shell block maintainers explicitly mark, then
+            reports the README location that needs attention.
+          </p>
+        </div>
+
+        <div class="terminal-pair" aria-label="Example SetupProof output">
+          <pre><code>&lt;!-- setupproof id=quickstart --&gt;
+```sh
+npm ci
+npm test
+```</code></pre>
+          <pre><code><span class="fail">[failed]</span> README.md#quickstart file=README.md:18 runner=local timeout=120s result=failed exit=1
+
+Fix the setup path once, in the same place contributors read it.</code></pre>
+        </div>
+      </section>
+
+      <section class="workflow reveal" id="workflow" aria-labelledby="workflow-title">
+        <div class="workflow-grid">
+          <div>
+            <p class="section-kicker">Maintainer path</p>
+            <h2 id="workflow-title">Mark, review, run.</h2>
+            <p>
+              Keep prose examples inert by default and make only the real setup
+              path executable.
+            </p>
+          </div>
+
+          <ol class="steps">
+            <li>
+              <span>01</span>
+              <div>
+                <strong>Mark the trusted block.</strong>
+                <p>Add a `setupproof` marker above the README command that must stay runnable.</p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <strong>Review before executing.</strong>
+                <p>Inspect the runner, timeout, shell, environment, and source command.</p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <strong>Run from a clean copy.</strong>
+                <p>Use the CLI locally or pin the GitHub Action in pull request checks.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="final" aria-labelledby="final-title">
+        <div>
+          <h2 id="final-title">Ship setup docs that still work.</h2>
+          <p>Apache-2.0. No telemetry. Built for maintainers who own the README.</p>
+        </div>
+        <a class="button" href="https://github.com/setupproof/setupproof/releases/tag/v0.1.0">
+          View v0.1.0
+        </a>
+      </section>
+    </main>
+
+    <script>
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          }
+        },
+        { threshold: 0.05 }
+      );
+
+      for (const element of document.querySelectorAll(".reveal")) {
+        observer.observe(element);
+      }
+    </script>
+  </body>
+</html>

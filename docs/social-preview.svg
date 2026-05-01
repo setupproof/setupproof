@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">SetupProof</title>
+  <desc id="desc">README quickstart verification for maintainers</desc>
+  <rect width="1280" height="640" fill="#f7f8f5"/>
+  <rect x="72" y="70" width="1136" height="500" fill="#111827"/>
+  <rect x="112" y="112" width="1056" height="82" fill="#ffffff"/>
+  <text x="142" y="165" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="44" font-weight="800">SetupProof</text>
+  <text x="432" y="163" fill="#546179" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="700">README quickstart verification</text>
+  <text x="112" y="286" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="70" font-weight="850">Run the setup steps</text>
+  <text x="112" y="366" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="70" font-weight="850">people copy.</text>
+  <text x="112" y="428" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="500">Mark trusted README blocks and review them.</text>
+  <text x="112" y="468" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="500">Fail CI when the public quickstart drifts.</text>
+  <rect x="112" y="506" width="478" height="46" fill="#0f766e"/>
+  <text x="134" y="538" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="22" font-weight="700">[passed] README.md#quickstart</text>
+  <rect x="824" y="506" width="344" height="46" fill="#ffffff"/>
+  <text x="846" y="538" fill="#111827" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="22" font-weight="700">setupproof review</text>
+</svg>

@@ -1,7 +1,7 @@
 VERSION ?= 0.1.0
 LDFLAGS := -X github.com/setupproof/setupproof/internal/app.Version=$(VERSION)
 
-.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples launch-polish check staticcheck vuln actionlint release-archives
+.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples check staticcheck vuln actionlint release-archives
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o ./setupproof ./cmd/setupproof
@@ -36,10 +36,7 @@ docs:
 examples:
 	sh scripts/check-examples.sh
 
-launch-polish:
-	sh scripts/check-launch-polish.sh
-
-check: test vet race foundation action docs examples launch-polish dogfood
+check: test vet race foundation action docs examples dogfood
 
 staticcheck:
 	go run honnef.co/go/tools/cmd/staticcheck@latest ./...

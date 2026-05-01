@@ -12,7 +12,6 @@ Before tagging a release, verify:
 - `bash scripts/check-github-action.sh`
 - `sh scripts/check-docs.sh`
 - `sh scripts/check-examples.sh`
-- `sh scripts/check-launch-polish.sh`
 - `make release-archives VERSION=<major.minor.patch>`
 
 Release archive gates:

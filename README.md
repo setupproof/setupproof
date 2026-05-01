@@ -12,6 +12,30 @@ same block locally or in CI.
 
 ![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
 
+## What It Catches
+
+README quickstarts usually fail in small, ordinary ways: a package moves, a test
+command changes, or a prerequisite is no longer true. SetupProof turns the
+marked block into the thing CI verifies.
+
+````md
+<!-- setupproof id=quickstart -->
+```sh
+npm ci
+npm test
+```
+````
+
+If that setup path breaks, the failure points back to the README block people
+would have copied:
+
+```text
+[failed] README.md#quickstart file=README.md:18 runner=local timeout=120s result=failed exit=1
+```
+
+The goal is not to lint Markdown. The goal is to keep the public setup path
+runnable from a clean checkout.
+
 ## Install
 
 Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
@@ -126,21 +150,6 @@ jobs:
 - No telemetry. No update checks.
 - Secrets pass only when configured.
 
-## For Agents
-
-Coding agents should treat SetupProof markers as the authoritative runnable
-quickstart surface:
-
-```sh
-setupproof --list README.md
-setupproof review README.md
-setupproof --dry-run --json --require-blocks README.md
-setupproof --require-blocks --no-color --no-glyphs README.md
-```
-
-Never execute unmarked Markdown shell blocks as SetupProof targets. See
-`docs/AGENT_USAGE.md` and `llms.txt` for the full agent contract.
-
 ## Demos And Docs
 
 - `docs/demo/setupproof.gif` shows the short terminal demo used above.
@@ -148,7 +157,6 @@ Never execute unmarked Markdown shell blocks as SetupProof targets. See
 - `docs/demo/terminal-demo.sh` regenerates a short terminal demo from source.
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
-- `docs/AGENT_USAGE.md` defines the recommended workflow for coding agents.
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
 - `docs/RELEASE_READINESS.md` lists release checks.
 - `schemas/` contains plan, report, and `setupproof.yml` JSON Schemas.
