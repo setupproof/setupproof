@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 - 2026-04-25
+## 0.1.0 - 2026-05-01
 
 - Initial public release.
 - Marked Markdown block discovery with HTML-comment and info-string marker
