@@ -14,6 +14,7 @@ $ROOT/CHANGELOG.md
 $ROOT/docs/ARCHITECTURE.md
 $ROOT/docs/INSTALL.md
 $ROOT/docs/RELEASE_READINESS.md
+$ROOT/docs/TROUBLESHOOTING.md
 $ROOT/docs/COMPARISON.md
 $ROOT/docs/DECISIONS.md
 $ROOT/.github/labels.yml
@@ -79,11 +80,20 @@ assert_contains "$ROOT/examples/monorepo/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/packages/web/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/rust/Cargo.toml" 'license = "Apache-2.0"'
 assert_contains "$ROOT/README.md" "docs/ARCHITECTURE.md"
+assert_contains "$ROOT/README.md" "docs/TROUBLESHOOTING.md"
 assert_contains "$ROOT/CONTRIBUTING.md" "Markdown -> Plan -> Workspace Copy -> Runner -> Report"
+assert_contains "$ROOT/CONTRIBUTING.md" "Claiming Issues"
+assert_contains "$ROOT/CONTRIBUTING.md" "linked pull request"
 assert_contains "$ROOT/CONTRIBUTING.md" "make dogfood"
 assert_contains "$ROOT/CONTRIBUTING.md" "CODE_OF_CONDUCT.md"
+assert_contains "$ROOT/SUPPORT.md" "docs/TROUBLESHOOTING.md"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "setupproof doctor README.md"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "No Marked Blocks Found"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "Docker Runner Problems"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "Missing Environment Variables"
 assert_contains "$ROOT/.github/pull_request_template.md" "make check"
 assert_contains "$ROOT/.github/pull_request_template.md" "make fmt-check"
+assert_contains "$ROOT/.github/pull_request_template.md" "make release-check"
 assert_contains "$ROOT/.github/ISSUE_TEMPLATE/bug_report.md" 'labels: "bug"'
 assert_contains "$ROOT/.github/ISSUE_TEMPLATE/setup-doc-failure.md" 'labels: "support"'
 assert_contains "$ROOT/.github/ISSUE_TEMPLATE/contributor_task.md" "make fmt-check"
@@ -92,6 +102,9 @@ assert_contains "$ROOT/docs/ARCHITECTURE.md" "Unmarked Markdown blocks never exe
 assert_contains "$ROOT/docs/ARCHITECTURE.md" "Report JSON is machine-facing output"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Moving major Action tags"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-archives"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-check"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "scripts/check-release-archives.sh"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "patched Go toolchain"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "CODE_OF_CONDUCT.md"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "The SetupProof workflow is green on"
 assert_contains "$ROOT/.github/repository-metadata.yml" "github-actions"

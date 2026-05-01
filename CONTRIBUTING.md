@@ -46,6 +46,7 @@ make check
 make staticcheck
 make vuln
 make actionlint
+make release-check
 ```
 
 `make check` runs the same repository checks documented in
@@ -62,6 +63,27 @@ changes, run the full gate before requesting review.
 Do not include secrets, tokens, private repository data, or vulnerability
 details in public issues or pull requests. Follow `SECURITY.md` for
 security-sensitive reports.
+
+## Claiming Issues
+
+Small documentation, example, and test tasks labeled `good first issue` are good
+places to start. They should already describe the expected behavior and the
+checks to run.
+
+Before starting larger behavior, runner, schema, Action, or release-facing
+changes, comment on the issue with the scope you intend to take. If an issue
+already has a linked pull request, treat it as in progress unless a maintainer
+marks it available again.
+
+Keep pull requests narrow. A good change usually closes one issue, touches one
+area, and leaves unrelated cleanup for a follow-up. If the work exposes a
+larger design question, pause and open a design discussion instead of expanding
+the patch.
+
+The scope rules below still apply to contributor tasks. In particular, do not
+add package-manager install commands, platform support claims, telemetry,
+network calls in non-executing commands, or plan/report JSON changes unless the
+issue explicitly calls for that work.
 
 ## Architecture
 

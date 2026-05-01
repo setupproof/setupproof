@@ -32,6 +32,7 @@ make check
 make staticcheck
 make vuln
 make actionlint
+make release-check
 ```
 
 ## Release Notes
