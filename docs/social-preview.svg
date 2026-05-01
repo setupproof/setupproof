@@ -1,17 +1,80 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
   <title id="title">SetupProof</title>
-  <desc id="desc">README quickstart verification for maintainers</desc>
-  <rect width="1280" height="640" fill="#f7f8f5"/>
-  <rect x="72" y="70" width="1136" height="500" fill="#111827"/>
-  <rect x="112" y="112" width="1056" height="82" fill="#ffffff"/>
-  <text x="142" y="165" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="44" font-weight="800">SetupProof</text>
-  <text x="432" y="163" fill="#546179" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="700">README quickstart verification</text>
-  <text x="112" y="286" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="70" font-weight="850">Run the setup steps</text>
-  <text x="112" y="366" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="70" font-weight="850">people copy.</text>
-  <text x="112" y="428" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="500">Mark trusted README blocks and review them.</text>
-  <text x="112" y="468" fill="#cbd5e1" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="30" font-weight="500">Fail CI when the public quickstart drifts.</text>
-  <rect x="112" y="506" width="478" height="46" fill="#0f766e"/>
-  <text x="134" y="538" fill="#ffffff" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="22" font-weight="700">[passed] README.md#quickstart</text>
-  <rect x="824" y="506" width="344" height="46" fill="#ffffff"/>
-  <text x="846" y="538" fill="#111827" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="22" font-weight="700">setupproof review</text>
+  <desc id="desc">README quickstart verification shown as a README block connected to terminal output</desc>
+
+  <rect width="1280" height="640" fill="#f6f7f2"/>
+  <path d="M0 112H1280M0 244H1280M0 376H1280M0 508H1280" stroke="#dfe5dc" stroke-width="1"/>
+  <path d="M188 0V640M456 0V640M724 0V640M992 0V640" stroke="#e8ede6" stroke-width="1"/>
+
+  <g transform="translate(78 58)">
+    <rect x="0" y="0" width="54" height="54" rx="14" fill="#111827"/>
+    <path d="M16 21L25 28L16 35" fill="none" stroke="#e5e7eb" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 36H41" fill="none" stroke="#14b8a6" stroke-width="4.5" stroke-linecap="round"/>
+    <text x="72" y="36" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="38" font-weight="780">SetupProof</text>
+    <text x="310" y="35" fill="#546179" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">README quickstart verification</text>
+  </g>
+
+  <g transform="translate(78 148)">
+    <rect x="0" y="0" width="510" height="410" rx="18" fill="#fffefb" stroke="#cdd8cc" stroke-width="2"/>
+    <rect x="0" y="0" width="510" height="54" rx="18" fill="#eef3ec"/>
+    <path d="M0 54H510" stroke="#cdd8cc" stroke-width="2"/>
+    <text x="28" y="35" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" font-weight="700">README.md</text>
+    <text x="390" y="35" fill="#6b7280" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="17">quickstart</text>
+
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">
+      <text x="28" y="100" fill="#9ca3af">01</text>
+      <text x="70" y="100" fill="#111827" font-weight="700"># Demo service</text>
+      <text x="28" y="146" fill="#9ca3af">03</text>
+      <text x="70" y="146" fill="#374151">This is the setup path:</text>
+
+      <rect x="58" y="178" width="404" height="152" rx="12" fill="#ecfdf5" stroke="#99f6e4" stroke-width="2"/>
+      <text x="28" y="210" fill="#9ca3af">05</text>
+      <text x="70" y="210" fill="#0f766e">&lt;!-- setupproof id=quickstart --&gt;</text>
+      <text x="28" y="246" fill="#9ca3af">06</text>
+      <text x="70" y="246" fill="#111827">```sh</text>
+      <text x="28" y="282" fill="#9ca3af">07</text>
+      <text x="70" y="282" fill="#111827">npm ci</text>
+      <text x="28" y="318" fill="#9ca3af">08</text>
+      <text x="70" y="318" fill="#111827">npm test</text>
+      <text x="28" y="354" fill="#9ca3af">09</text>
+      <text x="70" y="354" fill="#111827">```</text>
+    </g>
+
+    <path d="M72 374C126 392 226 395 318 382" fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round"/>
+    <text x="336" y="388" fill="#0f766e" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="16">marked block</text>
+  </g>
+
+  <path d="M590 346C620 322 631 290 672 282" fill="none" stroke="#0f766e" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M662 270L689 281L665 297" fill="none" stroke="#0f766e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g transform="translate(660 148)">
+    <rect x="0" y="0" width="542" height="410" rx="18" fill="#111827" stroke="#111827" stroke-width="2"/>
+    <rect x="20" y="20" width="502" height="370" rx="12" fill="#0f172a" stroke="#2f3a4a" stroke-width="2"/>
+    <circle cx="48" cy="50" r="7" fill="#ef4444"/>
+    <circle cx="72" cy="50" r="7" fill="#f59e0b"/>
+    <circle cx="96" cy="50" r="7" fill="#22c55e"/>
+
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
+      <text x="46" y="98" fill="#e5e7eb">$ setupproof review README.md</text>
+      <text x="46" y="142" fill="#99f6e4">README.md#quickstart</text>
+      <text x="72" y="176" fill="#cbd5e1">runner: local</text>
+      <text x="72" y="208" fill="#cbd5e1">workspace copy: tracked</text>
+      <text x="72" y="240" fill="#cbd5e1">shell: sh</text>
+      <text x="72" y="272" fill="#cbd5e1">timeout: 120s</text>
+      <text x="46" y="326" fill="#e5e7eb">$ setupproof --require-blocks README.md</text>
+    </g>
+
+    <rect x="46" y="344" width="394" height="36" rx="8" fill="#0f766e"/>
+    <text x="62" y="369" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700">[passed] README.md#quickstart</text>
+  </g>
+
+  <g transform="translate(82 588)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#546179">
+    <text x="0" y="0">clean workspace</text>
+    <circle cx="178" cy="-6" r="4" fill="#0f766e"/>
+    <text x="198" y="0">GitHub Action</text>
+    <circle cx="360" cy="-6" r="4" fill="#0f766e"/>
+    <text x="380" y="0">Apache-2.0</text>
+    <circle cx="540" cy="-6" r="4" fill="#0f766e"/>
+    <text x="560" y="0">no telemetry</text>
+  </g>
 </svg>
