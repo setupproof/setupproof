@@ -11,7 +11,7 @@ inputs:
     required: false
     default: ""
   cli-path:
-    description: Optional trusted path to an already built SetupProof CLI binary. The action runs this binary without re-verifying its provenance; ensure it was produced inside the workflow.
+    description: Optional trusted path to an already built SetupProof CLI binary. The action runs this binary as provided; ensure it was produced inside the workflow.
     required: false
     default: ""
   files:

@@ -486,7 +486,7 @@ test_no_secret_default_workflow_shape() {
   assert_contains "$ROOT/action.yml" "default: \"true\""
   assert_contains "$ROOT/action.yml" "published release"
   assert_contains "$ROOT/action.yml" "trusted path"
-  assert_contains "$ROOT/action.yml" "without re-verifying its provenance"
+  assert_contains "$ROOT/action.yml" "runs this binary as provided"
   assert_not_contains "$ROOT/action.yml" "default: v0.1.0"
   assert_not_contains "$ROOT/action.yml" "secrets."
   assert_not_contains "$ROOT/action.yml" "github-token"

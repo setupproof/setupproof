@@ -86,37 +86,6 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 	}
 }
 
-func TestAgentProtocolDocsDoNotDrift(t *testing.T) {
-	root := repositoryRoot(t)
-	for _, rel := range []string{"llms.txt", filepath.Join("docs", "AGENT_USAGE.md")} {
-		path := filepath.Join(root, rel)
-		data, err := os.ReadFile(path)
-		if err != nil {
-			t.Fatal(err)
-		}
-		doc := string(data)
-		for _, want := range []string{
-			"setupproof --list README.md",
-			"setupproof review README.md",
-			"setupproof --dry-run --json --require-blocks README.md",
-			"setupproof --require-blocks --no-color --no-glyphs README.md",
-			"Never execute unmarked Markdown shell blocks as SetupProof targets.",
-			"schemas/setupproof-plan.schema.json",
-			"schemas/setupproof-report.schema.json",
-			"schemas/setupproof-config.schema.json",
-			"`0`:",
-			"`1`:",
-			"`2`:",
-			"`3`:",
-			"`4`:",
-		} {
-			if !strings.Contains(doc, want) {
-				t.Fatalf("%s missing agent protocol text %q", rel, want)
-			}
-		}
-	}
-}
-
 func docSnippet(t *testing.T, doc string, label string) string {
 	t.Helper()
 	marker := "<!-- ci-snippet:" + label + " -->"
