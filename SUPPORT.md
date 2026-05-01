@@ -13,6 +13,10 @@ For help with a SetupProof run, include:
 - `setupproof review README.md` output for the block;
 - the Markdown or JSON report when it is safe to share.
 
+`docs/TROUBLESHOOTING.md` maps common failures to the next command to run,
+including no marked blocks, timeouts, interactive commands, Docker startup
+problems, and missing required environment variables.
+
 Do not include secrets, private hostnames, or unredacted command logs in public
 support requests. SetupProof redacts configured secrets, but transformed or
 partial secrets may still appear in project command output.

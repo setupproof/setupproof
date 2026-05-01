@@ -166,6 +166,8 @@ jobs:
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
 - `docs/RELEASE_READINESS.md` lists release checks.
+- `docs/TROUBLESHOOTING.md` maps common failure output to the next command to
+  run.
 - `schemas/` contains plan, report, and `setupproof.yml` JSON Schemas.
 - `examples/` contains Node, Python, Docker Compose, monorepo, Go, and Rust
   fixtures.
@@ -184,7 +186,7 @@ For release-oriented changes, also run:
 make staticcheck
 make vuln
 make actionlint
-make release-archives
+make release-check
 ```
 
 ## License
