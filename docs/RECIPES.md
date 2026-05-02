@@ -59,7 +59,7 @@ files:
 
 Set `requireBlocks: false` for repositories whose docs pages mostly contain
 prose plus illustrative commands that should not be executed unattended. With
-this recipe, run `setupproof review README.md` (or in CI, `setupproof
+this recipe, run `setupproof review` (or in CI, `setupproof
 --list`) to inspect what SetupProof would discover without actually running
 any block. This keeps the v0.1 review path useful for archives and copy-this-
 verbatim guides, at the cost of losing the safety net that `requireBlocks:
@@ -72,7 +72,7 @@ version: 1
 
 defaults:
   runner: docker
-  image: ghcr.io/setupproof/runner:0.1.0
+  image: ghcr.io/OWNER/IMAGE:TAG
   timeout: 5m
 
 files:
@@ -88,7 +88,7 @@ env:
 
 Use the Docker runner when the documented setup needs a pinned base image or
 when host-tooling drift makes local execution unreliable. Pin the image by
-digest (`ghcr.io/setupproof/runner:0.1.0@sha256:...`) once you have a known-
+digest (`ghcr.io/OWNER/IMAGE:TAG@sha256:...`) once you have a known-
 good build; the schema accepts any non-whitespace string. `env.pass` with
 `secret: true` redacts the value from supported output sinks, and `required:
 true` fails before execution rather than mid-run when the variable is missing.
