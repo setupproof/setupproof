@@ -236,6 +236,7 @@
       }
 
       .proof p,
+      .cases p,
       .workflow p {
         color: var(--muted);
         font-size: 18px;
@@ -261,6 +262,16 @@
         font-family: inherit;
       }
 
+      p code {
+        border: 1px solid color-mix(in srgb, var(--line) 80%, var(--ink));
+        background: color-mix(in srgb, var(--paper) 80%, #ffffff);
+        padding: 0 0.22em;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", monospace;
+        font-size: 0.92em;
+      }
+
       .fail {
         color: #fca5a5;
       }
@@ -271,6 +282,40 @@
 
       .workflow {
         padding: clamp(56px, 8vw, 110px) clamp(20px, 4vw, 56px);
+      }
+
+      .cases {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+        gap: clamp(28px, 5vw, 72px);
+        padding: clamp(56px, 8vw, 110px) clamp(20px, 4vw, 56px);
+        border-top: 1px solid var(--line);
+        background: #f1f5ef;
+      }
+
+      .case-list {
+        display: grid;
+        gap: 0;
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+      }
+
+      .case-list li {
+        padding: 20px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .case-list strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 19px;
+      }
+
+      .case-list p {
+        margin: 0;
+        font-size: 16px;
       }
 
       .workflow-grid {
@@ -375,6 +420,7 @@
       @media (max-width: 900px) {
         .hero,
         .proof,
+        .cases,
         .workflow-grid {
           grid-template-columns: 1fr;
         }
@@ -444,6 +490,7 @@
       <a class="wordmark" href="#top">SetupProof</a>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#proof">Proof</a>
+        <a href="#examples">Examples</a>
         <a href="#workflow">Workflow</a>
         <a href="https://github.com/setupproof/setupproof">GitHub</a>
         <a href="https://github.com/setupproof/setupproof/blob/main/docs/INSTALL.md">Docs</a>
@@ -456,8 +503,8 @@
           <p class="eyebrow">README quickstart verification</p>
           <h1 id="hero-title">SetupProof</h1>
           <p class="lede">
-            Test marked README quickstarts from a clean workspace before
-            contributors hit them.
+            Run the setup command people copy from the README before a new
+            contributor has to debug it.
           </p>
           <div class="actions">
             <a class="button primary" href="https://github.com/setupproof/setupproof#install">
@@ -504,6 +551,43 @@ Fix the setup path once, in the same place contributors read it.</code></pre>
         </div>
       </section>
 
+      <section class="cases reveal" id="examples" aria-labelledby="examples-title">
+        <div>
+          <p class="section-kicker">Where it helps</p>
+          <h2 id="examples-title">
+            Catch the boring break before a contributor does.
+          </h2>
+          <p>
+            Setup docs usually fail because something small moved and nobody
+            reran the public path from a clean checkout.
+          </p>
+        </div>
+
+        <ul class="case-list">
+          <li>
+            <strong>Changed install path.</strong>
+            <p>
+              The README still says <code>npm ci</code> after the project
+              switches package managers.
+            </p>
+          </li>
+          <li>
+            <strong>Renamed local service.</strong>
+            <p>
+              The quickstart points at <code>web</code>, but the Compose
+              service is now <code>app</code>.
+            </p>
+          </li>
+          <li>
+            <strong>Moved package.</strong>
+            <p>
+              A monorepo example keeps <code>cd packages/site</code> after the
+              package was relocated.
+            </p>
+          </li>
+        </ul>
+      </section>
+
       <section class="workflow reveal" id="workflow" aria-labelledby="workflow-title">
         <div class="workflow-grid">
           <div>
@@ -520,7 +604,10 @@ Fix the setup path once, in the same place contributors read it.</code></pre>
               <span>01</span>
               <div>
                 <strong>Mark the trusted block.</strong>
-                <p>Add a `setupproof` marker above the README command that must stay runnable.</p>
+                <p>
+                  Add a <code>setupproof</code> marker above the README command
+                  that must stay runnable.
+                </p>
               </div>
             </li>
             <li>

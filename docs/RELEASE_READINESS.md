@@ -13,13 +13,24 @@ Before tagging a release, verify:
 - `sh scripts/check-docs.sh`
 - `sh scripts/check-examples.sh`
 - `make release-archives VERSION=<major.minor.patch>`
+- `make release-check VERSION=<major.minor.patch>`
 
 Release archive gates:
 
 - Linux and macOS archives exist for `amd64` and `arm64`.
 - The checksum manifest includes every archive.
+- `scripts/check-release-archives.sh` verifies archive contents and checksums.
 - Each extracted binary prints the expected version with `setupproof --version`.
 - The GitHub release body includes the Go install command and the Action pin.
+
+Release automation gates:
+
+- `.github/workflows/release-checks.yml` runs the full repository gate, static
+  analysis, vulnerability scan, workflow lint, and archive verification.
+- The release checks workflow uses a patched Go toolchain for release and
+  security gates rather than the oldest module language version.
+- Keep the required SetupProof workflow small and fast; add slower
+  release-oriented checks to the release checks workflow.
 
 Action wrapper gates:
 

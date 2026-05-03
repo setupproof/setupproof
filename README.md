@@ -6,9 +6,11 @@ Test marked README quickstarts from a clean workspace before contributors hit
 them.
 
 Setup docs drift because normal CI checks the code, not the commands people
-copy from the README. SetupProof gives maintainers a small, explicit check for
-that boundary: mark the shell block you expect to keep working, then run the
-same block locally or in CI.
+copy from the README. A renamed Compose service, a moved package path, or an
+install command that no longer matches the lockfile can turn the first five
+minutes into guesswork. SetupProof gives maintainers a small, explicit check
+for that boundary: mark the shell block you expect to keep working, then run
+the same block locally or in CI.
 
 ![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
 
@@ -35,6 +37,11 @@ would have copied:
 
 The goal is not to lint Markdown. The goal is to keep the public setup path
 runnable from a clean checkout.
+
+Good first targets are the commands a new contributor runs before they know the
+project: install dependencies, run the default tests, start the local service,
+or enter the package that owns the example. Those paths change quietly, and they
+are exactly the failures SetupProof makes visible.
 
 ## Install
 
@@ -160,6 +167,8 @@ jobs:
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
 - `docs/RECIPES.md` collects copyable `setupproof.yml` starters for common repository layouts.
 - `docs/RELEASE_READINESS.md` lists release checks.
+- `docs/TROUBLESHOOTING.md` maps common failure output to the next command to
+  run.
 - `schemas/` contains plan, report, and `setupproof.yml` JSON Schemas.
 - `examples/` contains Node, Python, Docker Compose, monorepo, Go, and Rust
   fixtures.
@@ -178,7 +187,7 @@ For release-oriented changes, also run:
 make staticcheck
 make vuln
 make actionlint
-make release-archives
+make release-check
 ```
 
 ## License
