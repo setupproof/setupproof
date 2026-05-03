@@ -13,6 +13,7 @@ $ROOT/SUPPORT.md
 $ROOT/CHANGELOG.md
 $ROOT/docs/ARCHITECTURE.md
 $ROOT/docs/INSTALL.md
+$ROOT/docs/RECIPES.md
 $ROOT/docs/RELEASE_READINESS.md
 $ROOT/docs/TROUBLESHOOTING.md
 $ROOT/docs/COMPARISON.md
@@ -80,7 +81,12 @@ assert_contains "$ROOT/examples/monorepo/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/packages/web/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/rust/Cargo.toml" 'license = "Apache-2.0"'
 assert_contains "$ROOT/README.md" "docs/ARCHITECTURE.md"
+assert_contains "$ROOT/README.md" "docs/RECIPES.md"
 assert_contains "$ROOT/README.md" "docs/TROUBLESHOOTING.md"
+assert_contains "$ROOT/docs/RECIPES.md" "schemas/setupproof-config.schema.json"
+assert_contains "$ROOT/docs/RECIPES.md" "version: 1"
+assert_contains "$ROOT/docs/RECIPES.md" "requireBlocks: false"
+assert_contains "$ROOT/docs/RECIPES.md" "runner: docker"
 assert_contains "$ROOT/CONTRIBUTING.md" "Markdown -> Plan -> Workspace Copy -> Runner -> Report"
 assert_contains "$ROOT/CONTRIBUTING.md" "Claiming Issues"
 assert_contains "$ROOT/CONTRIBUTING.md" "linked pull request"

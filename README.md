@@ -165,6 +165,7 @@ jobs:
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
+- `docs/RECIPES.md` collects copyable `setupproof.yml` starters for common repository layouts.
 - `docs/RELEASE_READINESS.md` lists release checks.
 - `docs/TROUBLESHOOTING.md` maps common failure output to the next command to
   run.
