@@ -1,6 +1,6 @@
 # Release Readiness
 
-SetupProof v0.1.0 is released through the Go module path, GitHub release
+SetupProof v0.1.1 is released through the Go module path, GitHub release
 archives, and a versioned composite GitHub Action.
 
 Before tagging a release, verify:
@@ -13,6 +13,7 @@ Before tagging a release, verify:
 - `sh scripts/check-docs.sh`
 - `sh scripts/check-examples.sh`
 - `make release-archives VERSION=<major.minor.patch>`
+- `make npm-check VERSION=<major.minor.patch>`
 - `make release-check VERSION=<major.minor.patch>`
 
 Release archive gates:
@@ -23,10 +24,24 @@ Release archive gates:
 - Each extracted binary prints the expected version with `setupproof --version`.
 - The GitHub release body includes the Go install command and the Action pin.
 
+npm package gates:
+
+- `scripts/package-npm.sh` stages a dependency-free package from the release
+  archives.
+- The package bundles Linux and macOS binaries for `amd64`/`arm64`; it does not
+  use postinstall scripts, install-time downloads, native builds, telemetry, or
+  hidden update checks.
+- `scripts/check-npm-package.sh` runs `npm pack --dry-run`, packs the tarball,
+  installs it into a clean temporary project, and verifies
+  `setupproof --version`.
+- npm install commands stay out of public install docs until the registry
+  package is published.
+
 Release automation gates:
 
 - `.github/workflows/release-checks.yml` runs the full repository gate, static
-  analysis, vulnerability scan, workflow lint, and archive verification.
+  analysis, vulnerability scan, workflow lint, archive verification, and the
+  npm packed-tarball smoke test.
 - The release checks workflow uses a patched Go toolchain for release and
   security gates rather than the oldest module language version.
 - Keep the required SetupProof workflow small and fast; add slower
@@ -55,8 +70,7 @@ Repository publication gates:
 
 Deferred distribution gates:
 
-- npm package exists and packed-tarball smoke tests pass before npm install
-  commands are documented.
+- npm registry publication exists before npm install commands are documented.
 - Homebrew, winget, Chocolatey, and Scoop packages exist before they are named
   as install options.
 - Marketplace listing must exist before Marketplace availability is advertised.

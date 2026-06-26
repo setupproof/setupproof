@@ -82,7 +82,9 @@ Common causes:
 - The image tag is mutable or the digest is missing.
 
 Prefer digest-pinned images for CI. Docker improves isolation from host tooling
-drift, but it is not a security sandbox for hostile commands.
+drift, but it is not a security sandbox for hostile commands. See
+`docs/DOCKER_RUNNER.md` for the runner's workspace, network, and environment
+model.
 
 ## Missing Environment Variables
 

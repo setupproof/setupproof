@@ -423,16 +423,13 @@ func RenderGitHubStepSummary(r *Report, opts StepSummaryOptions) string {
 	lines = append(lines,
 		"### "+title,
 		"",
-		"| Block | Result | Exit | Reason |",
-		"| --- | --- | ---: | --- |",
+		"| Block | Location | Result | Exit | Reason |",
+		"| --- | --- | --- | ---: | --- |",
 	)
 	for _, block := range selected {
-		blockID := block.QualifiedID
-		if blockID == "" {
-			blockID = block.File + "#" + block.ID
-		}
-		lines = append(lines, fmt.Sprintf("| %s | %s | %d | %s |",
-			summaryText(blockID, 160),
+		lines = append(lines, fmt.Sprintf("| %s | %s | %s | %d | %s |",
+			summaryText(summaryBlockID(block), 160),
+			summaryText(summaryLocation(block), 120),
 			summaryText(block.Result, 80),
 			block.ExitCode,
 			summaryText(block.Reason, 120),
@@ -443,10 +440,112 @@ func RenderGitHubStepSummary(r *Report, opts StepSummaryOptions) string {
 		omitted = len(r.Blocks) - len(selected)
 	}
 	if omitted > 0 {
-		lines = append(lines, fmt.Sprintf("| ... %d more |  |  |  |", omitted))
+		lines = append(lines, fmt.Sprintf("| ... %d more |  |  |  |  |", omitted))
 	}
 	lines = append(lines, "")
+	if len(failed) > 0 {
+		lines = append(lines, summaryFailureDetails(failed)...)
+	}
 	return strings.Join(lines, "\n") + "\n"
+}
+
+func summaryFailureDetails(blocks []Block) []string {
+	selected := blocks
+	if len(selected) > 3 {
+		selected = selected[:3]
+	}
+	lines := []string{"### Failure Details", ""}
+	for _, block := range selected {
+		lines = append(lines,
+			"#### "+summaryText(summaryBlockID(block), 160),
+			"",
+			"- location: "+summaryText(summaryLocation(block), 160),
+			"- runner: "+summaryText(block.Runner, 80),
+			"- timeout: "+summaryText(block.Timeout, 80),
+			"- next command: "+summaryText(reviewCommand(block.File), 240),
+		)
+		if block.InteractiveCommand != "" {
+			lines = append(lines, "- interactive command: "+summaryText(block.InteractiveCommand, 120))
+		}
+		if strings.TrimSpace(block.Source) != "" {
+			lines = append(lines, "", "Source:", "", summaryFence("", block.Source, 1200))
+		}
+		if tail, title := summaryBestTail(block); tail != "" {
+			lines = append(lines, title+":", "", summaryFence("text", tail, 1600))
+		}
+		lines = append(lines, "")
+	}
+	if len(blocks) > len(selected) {
+		lines = append(lines, fmt.Sprintf("_%d more failing block(s) omitted from details._", len(blocks)-len(selected)), "")
+	}
+	return lines
+}
+
+func summaryBlockID(block Block) string {
+	if block.QualifiedID != "" {
+		return block.QualifiedID
+	}
+	if block.File == "" {
+		return block.ID
+	}
+	return block.File + "#" + block.ID
+}
+
+func summaryLocation(block Block) string {
+	if block.File == "" {
+		return ""
+	}
+	if block.Line <= 0 {
+		return block.File
+	}
+	return fmt.Sprintf("%s:%d", block.File, block.Line)
+}
+
+func summaryBestTail(block Block) (string, string) {
+	if strings.TrimSpace(block.StderrTail) != "" {
+		title := "Stderr tail"
+		if block.Truncated.Stderr {
+			title += " (truncated)"
+		}
+		return block.StderrTail, title
+	}
+	if strings.TrimSpace(block.StdoutTail) != "" {
+		title := "Stdout tail"
+		if block.Truncated.Stdout {
+			title += " (truncated)"
+		}
+		return block.StdoutTail, title
+	}
+	return "", ""
+}
+
+func summaryFence(info string, value string, maxRunes int) string {
+	value = summaryLog(value, maxRunes)
+	fence := markdownFence(value)
+	var builder strings.Builder
+	builder.WriteString(fence)
+	if info != "" {
+		builder.WriteString(info)
+	}
+	builder.WriteString("\n")
+	builder.WriteString(value)
+	if !strings.HasSuffix(value, "\n") {
+		builder.WriteString("\n")
+	}
+	builder.WriteString(fence)
+	return builder.String()
+}
+
+func summaryLog(value string, maxRunes int) string {
+	value = StripANSI(strings.ReplaceAll(value, "\r", ""))
+	if maxRunes <= 0 {
+		return value
+	}
+	runes := []rune(value)
+	if len(runes) <= maxRunes {
+		return value
+	}
+	return string(runes[:maxRunes]) + "\n... truncated\n"
 }
 
 func nonPassingBlocks(blocks []Block) []Block {

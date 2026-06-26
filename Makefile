@@ -1,10 +1,10 @@
-VERSION ?= 0.1.0
+VERSION ?= 0.1.1
 LDFLAGS := -X github.com/setupproof/setupproof/internal/app.Version=$(VERSION)
 STATICCHECK_VERSION ?= v0.6.1
 GOVULNCHECK_VERSION ?= v1.1.4
 ACTIONLINT_VERSION ?= v1.7.7
 
-.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples check staticcheck vuln actionlint release-archives release-check
+.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples check staticcheck vuln actionlint release-archives npm-package npm-check release-check
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o ./setupproof ./cmd/setupproof
@@ -53,5 +53,12 @@ actionlint:
 release-archives:
 	scripts/package-release.sh v$(VERSION)
 
-release-check: release-archives
+npm-package: release-archives
+	scripts/package-npm.sh v$(VERSION)
+
+npm-check: npm-package
+	scripts/check-npm-package.sh v$(VERSION)
+
+release-check: release-archives npm-package
 	scripts/check-release-archives.sh v$(VERSION)
+	scripts/check-npm-package.sh v$(VERSION)

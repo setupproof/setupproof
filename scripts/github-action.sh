@@ -444,117 +444,12 @@ write_step_summary() {
   fi
 
   summary_tmp="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/setupproof-step-summary.md"
-  if [ "${SETUPPROOF_DISABLE_PYTHON_SUMMARY:-}" != "1" ] && command -v python3 >/dev/null 2>&1; then
-    SETUPPROOF_SUMMARY_FILES="$files" SETUPPROOF_SUMMARY_LIMIT_BYTES="$summary_limit_bytes" \
-      python3 - "$mode" "$status" "$summary_report" "$report_json" > "$summary_tmp" <<'PY'
-import json
-import os
-import sys
-
-mode = sys.argv[1]
-status = int(sys.argv[2])
-summary_report = sys.argv[3]
-report_json = sys.argv[4]
-files = os.environ.get("SETUPPROOF_SUMMARY_FILES", "")
-limit = int(os.environ.get("SETUPPROOF_SUMMARY_LIMIT_BYTES", "60000"))
-
-def md(value, max_len=160):
-    text = str(value if value is not None else "")
-    text = text.replace("\r", "").replace("\n", "<br>").replace("|", "\\|")
-    if len(text) > max_len:
-        return text[: max_len - 3] + "..."
-    return text
-
-lines = ["## SetupProof", ""]
-
-if mode == "review":
-    lines.extend([
-        "- mode: review",
-        f"- exit code: {status}",
-        "- report JSON: not produced in review mode",
-        "",
-        "Review mode is non-executing.",
-    ])
-else:
-    report = None
-    if summary_report and os.path.exists(summary_report) and os.path.getsize(summary_report) > 0:
-        try:
-            with open(summary_report, "r", encoding="utf-8") as handle:
-                report = json.load(handle)
-        except Exception:
-            report = None
-
-    if not report:
-        lines.extend([
-            "- result: unavailable",
-            f"- exit code: {status}",
-            f"- report JSON: `{md(report_json, 240)}`",
-            "",
-            "SetupProof did not produce a readable JSON report.",
-        ])
-    else:
-        blocks = report.get("blocks") or []
-        warnings = report.get("warnings") or []
-        failed = [b for b in blocks if b.get("result") != "passed"]
-        selected = failed[:15] if failed else blocks[:15]
-        lines.extend([
-            f"- result: {md(report.get('result', 'unknown'))}",
-            f"- exit code: {report.get('exitCode', status)}",
-            f"- duration ms: {report.get('durationMs', 0)}",
-            f"- report JSON: `{md(report_json, 240)}`",
-            f"- files: {md(', '.join(report.get('files') or []), 240)}",
-            "",
-        ])
-        if warnings:
-            lines.append("### Warnings")
-            lines.append("")
-            for warning in warnings[:10]:
-                lines.append(f"- {md(warning, 240)}")
-            if len(warnings) > 10:
-                lines.append(f"- ... {len(warnings) - 10} more")
-            lines.append("")
-        if blocks:
-            title = "Failing Blocks" if failed else "Blocks"
-            lines.extend([
-                f"### {title}",
-                "",
-                "| Block | Result | Exit | Reason |",
-                "| --- | --- | ---: | --- |",
-            ])
-            for block in selected:
-                block_id = block.get("qualifiedId") or f"{block.get('file', '')}#{block.get('id', '')}"
-                lines.append(
-                    f"| {md(block_id)} | {md(block.get('result', 'unknown'), 80)} | "
-                    f"{block.get('exitCode', 0)} | {md(block.get('reason', ''), 120)} |"
-                )
-            omitted = len((failed if failed else blocks)) - len(selected)
-            if omitted > 0:
-                lines.append(f"| ... {omitted} more |  |  |  |")
-            lines.append("")
-        else:
-            lines.append("No marked blocks were reported.")
-            lines.append("")
-
-if files and mode != "run":
-    rendered_files = ", ".join([line for line in files.splitlines() if line])
-    lines.extend(["", f"- files: {md(rendered_files, 240)}"])
-
-text = "\n".join(lines).rstrip() + "\n"
-encoded = text.encode("utf-8")
-if len(encoded) > limit:
-    suffix = "\n\n_Summary truncated by SetupProof Action._\n"
-    cut = max(0, limit - len(suffix.encode("utf-8")))
-    text = encoded[:cut].decode("utf-8", errors="ignore").rstrip() + suffix
-sys.stdout.write(text)
-PY
-  else
-    summary_input="/dev/null"
-    if [ -n "$summary_report" ] && [ -s "$summary_report" ]; then
-      summary_input="$summary_report"
-    fi
-    if ! "$cli" report --format=github-step-summary --mode "$mode" --status "$status" --report-json "$report_json" --files "$files" < "$summary_input" > "$summary_tmp"; then
-      write_minimal_step_summary "$mode" "$status" "$report_json" > "$summary_tmp"
-    fi
+  summary_input="/dev/null"
+  if [ -n "$summary_report" ] && [ -s "$summary_report" ]; then
+    summary_input="$summary_report"
+  fi
+  if ! "$cli" report --format=github-step-summary --mode "$mode" --status "$status" --report-json "$report_json" --files "$files" < "$summary_input" > "$summary_tmp"; then
+    write_minimal_step_summary "$mode" "$status" "$report_json" > "$summary_tmp"
   fi
 
   if [ "$(wc -c < "$summary_tmp")" -gt "$summary_limit_bytes" ]; then

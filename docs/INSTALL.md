@@ -1,15 +1,15 @@
 # Install And CI
 
-SetupProof v0.1.0 ships as a Go module, GitHub release archives, and a
-versioned composite GitHub Action. npm, Homebrew, winget, Chocolatey, and Scoop
-packages are not published yet.
+SetupProof v0.1.1 ships as a Go module, GitHub release archives, and a
+versioned composite GitHub Action. npm registry, Homebrew, winget, Chocolatey,
+and Scoop packages are not published yet.
 
 ## Go Install
 
 Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
 
 ```sh
-go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0
+go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.1
 setupproof --version
 setupproof review README.md
 setupproof --require-blocks --no-color --no-glyphs README.md
@@ -23,11 +23,11 @@ archive with the matching checksum manifest before running it.
 
 Archive names:
 
-- `setupproof_0.1.0_linux_amd64.tar.gz`
-- `setupproof_0.1.0_linux_arm64.tar.gz`
-- `setupproof_0.1.0_darwin_amd64.tar.gz`
-- `setupproof_0.1.0_darwin_arm64.tar.gz`
-- `setupproof_0.1.0_checksums.txt`
+- `setupproof_0.1.1_linux_amd64.tar.gz`
+- `setupproof_0.1.1_linux_arm64.tar.gz`
+- `setupproof_0.1.1_darwin_amd64.tar.gz`
+- `setupproof_0.1.1_darwin_arm64.tar.gz`
+- `setupproof_0.1.1_checksums.txt`
 
 ## Source Checkout
 
@@ -41,7 +41,7 @@ make build
 ```
 
 Use `make build VERSION=<tag>` when building a release binary from a tagged
-checkout. Use `make release-archives VERSION=0.1.0` to build the release
+checkout. Use `make release-archives VERSION=0.1.1` to build the release
 archive set locally.
 
 For a new project, `setupproof init` writes only `setupproof.yml` by default.
@@ -83,15 +83,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: setupproof/setupproof@v0.1.0
+      - uses: setupproof/setupproof@v0.1.1
         with:
-          cli-version: v0.1.0
+          cli-version: v0.1.1
           mode: review
           require-blocks: "true"
           files: README.md
-      - uses: setupproof/setupproof@v0.1.0
+      - uses: setupproof/setupproof@v0.1.1
         with:
-          cli-version: v0.1.0
+          cli-version: v0.1.1
           require-blocks: "true"
           files: README.md
 ```
@@ -171,7 +171,8 @@ v0.1 platform support:
 - macOS is best effort. Shell behavior can differ from Linux, so run
   `setupproof doctor README.md` before relying on macOS-only CI.
 - Docker runner support requires Docker and is an isolation upgrade, not a
-  security sandbox for hostile commands.
+  security sandbox for hostile commands. See `docs/DOCKER_RUNNER.md` for image,
+  network, and environment tradeoffs.
 - Git submodules and linked worktrees are treated as their own repository
   boundary when their `.git` metadata is a file. `setupproof doctor` reports
   that layout so path resolution surprises are visible before execution.
@@ -186,14 +187,14 @@ blocks.
 
 ## Distribution Status
 
-Published for v0.1.0:
+Published for v0.1.1:
 
 - Go install from the public module path.
 - Linux and macOS release archives with checksums.
-- Versioned GitHub Action usage with `cli-version: v0.1.0`.
+- Versioned GitHub Action usage with `cli-version: v0.1.1`.
 
 Deferred until implemented and verified:
 
-- npm package distribution.
+- npm registry publication.
 - Homebrew, winget, Chocolatey, and Scoop packages.
 - GitHub Marketplace listing.

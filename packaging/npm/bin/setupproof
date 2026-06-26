@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
+
+const platforms = new Map([
+  ['darwin', 'darwin'],
+  ['linux', 'linux'],
+]);
+
+const arches = new Map([
+  ['arm64', 'arm64'],
+  ['x64', 'x64'],
+]);
+
+function fail(message) {
+  process.stderr.write(`setupproof npm wrapper: ${message}\n`);
+  process.exit(2);
+}
+
+const platform = platforms.get(process.platform);
+const arch = arches.get(process.arch);
+
+if (!platform || !arch) {
+  fail(`unsupported platform ${process.platform}/${process.arch}; native Windows execution is unsupported, use WSL2`);
+}
+
+const binary = path.join(__dirname, '..', 'vendor', `${platform}-${arch}`, 'setupproof');
+if (!fs.existsSync(binary)) {
+  fail(`missing bundled binary for ${platform}/${arch}`);
+}
+
+const result = spawnSync(binary, process.argv.slice(2), { stdio: 'inherit' });
+if (result.error) {
+  fail(result.error.message);
+}
+
+if (result.signal) {
+  const signalExitCodes = new Map([
+    ['SIGHUP', 129],
+    ['SIGINT', 130],
+    ['SIGTERM', 143],
+  ]);
+  process.exit(signalExitCodes.get(result.signal) || 1);
+}
+
+process.exit(result.status === null ? 1 : result.status);

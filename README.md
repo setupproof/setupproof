@@ -48,7 +48,7 @@ are exactly the failures SetupProof makes visible.
 Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
 
 ```sh
-go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0
+go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.1
 setupproof --version
 ```
 
@@ -134,15 +134,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: setupproof/setupproof@v0.1.0
+      - uses: setupproof/setupproof@v0.1.1
         with:
-          cli-version: v0.1.0
+          cli-version: v0.1.1
           mode: review
           require-blocks: "true"
           files: README.md
-      - uses: setupproof/setupproof@v0.1.0
+      - uses: setupproof/setupproof@v0.1.1
         with:
-          cli-version: v0.1.0
+          cli-version: v0.1.1
           require-blocks: "true"
           files: README.md
 ```
@@ -164,6 +164,7 @@ jobs:
 - `docs/demo/terminal-demo.sh` regenerates a short terminal demo from source.
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
+- `docs/DOCKER_RUNNER.md` documents Docker runner tradeoffs and trust boundaries.
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
 - `docs/RECIPES.md` collects copyable `setupproof.yml` starters for common repository layouts.
 - `docs/RELEASE_READINESS.md` lists release checks.
