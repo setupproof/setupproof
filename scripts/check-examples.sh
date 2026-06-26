@@ -41,6 +41,7 @@ examples/monorepo/docs/web.md
 examples/monorepo/docs/api.md
 examples/go/README.md
 examples/rust/README.md
+examples/failing-go/README.md
 '
 
 BIN="$TMP_ROOT/setupproof"
@@ -56,7 +57,7 @@ BIN="$TMP_ROOT/setupproof"
   "$BIN" --dry-run --json --require-blocks $EXAMPLE_MARKDOWN > "$TMP_ROOT/plan.json"
 )
 
-for id in node-npm-test python-pip-test docker-compose-smoke web-package api-service go-test rust-cargo-test; do
+for id in node-npm-test python-pip-test docker-compose-smoke web-package api-service go-test rust-cargo-test failing-go-test; do
   assert_contains "$TMP_ROOT/list.txt" "id=$id"
   assert_contains "$TMP_ROOT/review.txt" "#$id"
   assert_contains "$TMP_ROOT/plan.json" "\"id\":\"$id\""
@@ -110,6 +111,19 @@ init_git_repo "$GO_EXAMPLE"
 )
 assert_contains "$TMP_ROOT/go-execution.txt" 'result=passed'
 assert_contains "$TMP_ROOT/go-execution.txt" 'README.md#go-test'
+
+FAILING_GO_EXAMPLE="$TMP_ROOT/failing-go-example"
+mkdir -p "$FAILING_GO_EXAMPLE"
+cp -R "$ROOT/examples/failing-go/." "$FAILING_GO_EXAMPLE"
+init_git_repo "$FAILING_GO_EXAMPLE"
+# This example is expected to fail; run with `|| true` so `set -e` doesn't trip
+# on the deliberate non-zero exit, then assert the failure was the one we expect.
+(
+  cd "$FAILING_GO_EXAMPLE"
+  "$BIN" --require-blocks --no-color --no-glyphs > "$TMP_ROOT/failing-go-execution.txt" || true
+)
+assert_contains "$TMP_ROOT/failing-go-execution.txt" 'result=failed'
+assert_contains "$TMP_ROOT/failing-go-execution.txt" 'README.md#failing-go-test'
 
 if command -v python3 >/dev/null 2>&1 && python3 -m venv "$TMP_ROOT/python-venv-probe" >/dev/null 2>&1; then
   PYTHON_EXAMPLE="$TMP_ROOT/python-example"

@@ -12,6 +12,7 @@ $ROOT/CONTRIBUTING.md
 $ROOT/SUPPORT.md
 $ROOT/CHANGELOG.md
 $ROOT/docs/ARCHITECTURE.md
+$ROOT/docs/DOCKER_RUNNER.md
 $ROOT/docs/INSTALL.md
 $ROOT/docs/RECIPES.md
 $ROOT/docs/RELEASE_READINESS.md
@@ -67,22 +68,27 @@ assert_contains "$DOC" "<!-- ci-snippet:generic-shell -->"
 assert_contains "$DOC" "Native Windows execution is unsupported in v0.1"
 assert_contains "$DOC" "PowerShell fenced blocks are unsupported in v0.1"
 assert_contains "$DOC" "WSL2"
-assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.0"
-assert_contains "$DOC" "setupproof_0.1.0_checksums.txt"
+assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.1"
+assert_contains "$DOC" "setupproof_0.1.1_checksums.txt"
 assert_contains "$DOC" "setupproof review README.md"
 assert_contains "$DOC" "setupproof --report-json setupproof-report.json --require-blocks --no-color --no-glyphs README.md"
 assert_contains "$DOC" "require-blocks: \"true\""
 assert_contains "$ROOT/LICENSE" "Apache License"
 assert_contains "$ROOT/NOTICE" "Licensed under the Apache License, Version 2.0."
 assert_contains "$ROOT/README.md" 'Apache License, Version 2.0 (`Apache-2.0`)'
-assert_contains "$ROOT/README.md" "setupproof/setupproof@v0.1.0"
+assert_contains "$ROOT/README.md" "setupproof/setupproof@v0.1.1"
 assert_contains "$ROOT/examples/node-npm/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/packages/web/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/rust/Cargo.toml" 'license = "Apache-2.0"'
 assert_contains "$ROOT/README.md" "docs/ARCHITECTURE.md"
+assert_contains "$ROOT/README.md" "docs/DOCKER_RUNNER.md"
 assert_contains "$ROOT/README.md" "docs/RECIPES.md"
 assert_contains "$ROOT/README.md" "docs/TROUBLESHOOTING.md"
+assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "security sandbox"
+assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "network: false"
+assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "digest"
+assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "env:"
 assert_contains "$ROOT/docs/RECIPES.md" "schemas/setupproof-config.schema.json"
 assert_contains "$ROOT/docs/RECIPES.md" "version: 1"
 assert_contains "$ROOT/docs/RECIPES.md" "requireBlocks: false"
@@ -108,8 +114,11 @@ assert_contains "$ROOT/docs/ARCHITECTURE.md" "Unmarked Markdown blocks never exe
 assert_contains "$ROOT/docs/ARCHITECTURE.md" "Report JSON is machine-facing output"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Moving major Action tags"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-archives"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make npm-check"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-check"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "scripts/check-release-archives.sh"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "scripts/check-npm-package.sh"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "packed-tarball smoke"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "patched Go toolchain"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "CODE_OF_CONDUCT.md"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "The SetupProof workflow is green on"

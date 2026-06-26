@@ -1,0 +1,10 @@
+# setupproof
+
+npm distribution wrapper for SetupProof __VERSION__.
+
+This package contains the Linux and macOS SetupProof binaries built from the
+matching GitHub release archives. It has no production dependencies, postinstall
+downloads, native builds, telemetry, or update checks.
+
+Use the repository README for current usage, safety, and CI guidance:
+https://github.com/setupproof/setupproof

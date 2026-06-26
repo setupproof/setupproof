@@ -141,7 +141,7 @@ func TestHelpDiscoveryAliasesAndFlags(t *testing.T) {
 }
 
 func TestReportGitHubStepSummaryCommand(t *testing.T) {
-	input := `{"kind":"report","schemaVersion":"1.0.0","setupproofVersion":"0.1.0","startedAt":"2026-04-24T00:00:00Z","durationMs":7,"result":"failed","exitCode":1,"invocation":{"args":[]},"workspace":{"mode":"temporary","source":"tracked","includedUntracked":false},"runner":{"kind":"local","workspace":"temporary","networkPolicy":"host","networkEnforced":false},"files":["README.md"],"warnings":[],"blocks":[{"id":"fail","qualifiedId":"README.md#fail","file":"README.md","line":1,"language":"sh","shell":"sh","source":"false","strict":true,"stdin":"closed","tty":false,"stateMode":"shared","isolated":false,"runner":"local","timeout":"120s","timeoutMs":120000,"result":"failed","exitCode":1,"reason":"exit-code","durationMs":1,"stdoutTail":"","stderrTail":"","truncated":{"stdout":false,"stderr":false}}]}`
+	input := `{"kind":"report","schemaVersion":"1.0.0","setupproofVersion":"0.1.0","startedAt":"2026-04-24T00:00:00Z","durationMs":7,"result":"failed","exitCode":1,"invocation":{"args":[]},"workspace":{"mode":"temporary","source":"tracked","includedUntracked":false},"runner":{"kind":"local","workspace":"temporary","networkPolicy":"host","networkEnforced":false},"files":["README.md"],"warnings":[],"blocks":[{"id":"fail","qualifiedId":"README.md#fail","file":"README.md","line":1,"language":"sh","shell":"sh","source":"false","strict":true,"stdin":"closed","tty":false,"stateMode":"shared","isolated":false,"runner":"local","timeout":"120s","timeoutMs":120000,"result":"failed","exitCode":1,"reason":"exit-code","durationMs":1,"stdoutTail":"","stderrTail":"failure output\n","truncated":{"stdout":false,"stderr":false}}]}`
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
@@ -165,7 +165,7 @@ func TestReportGitHubStepSummaryCommand(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit code = %d, stderr = %q", code, stderr.String())
 	}
-	for _, want := range []string{"result: failed", "Failing Blocks", "README.md#fail", "exit-code"} {
+	for _, want := range []string{"result: failed", "Failing Blocks", "README.md#fail", "README.md:1", "next command: setupproof review README.md", "failure output"} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("summary missing %q:\n%s", want, stdout.String())
 		}

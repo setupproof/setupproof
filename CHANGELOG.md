@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.1 - 2026-06-26
+
+- Added a failing Go fixture that demonstrates README drift detection.
+- Improved GitHub Action step summaries with failure location, next command,
+  source, and output-tail context.
+- Added npm packed-tarball release tooling and smoke checks.
+- Documented Docker runner tradeoffs and trust boundaries.
+- Updated release checks for the current Action dependency set.
+
 ## 0.1.0 - 2026-05-01
 
 - Initial public release.

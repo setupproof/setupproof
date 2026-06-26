@@ -93,4 +93,5 @@ good build; the schema accepts any non-whitespace string. `env.pass` with
 `secret: true` redacts the value from supported output sinks, and `required:
 true` fails before execution rather than mid-run when the variable is missing.
 The tradeoff is that the Docker runner adds image-pull latency on the first
-run and requires Docker on the host or runner.
+run and requires Docker on the host or runner. See `docs/DOCKER_RUNNER.md` for
+the full trust boundary and runtime model.

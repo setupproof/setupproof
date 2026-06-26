@@ -229,14 +229,31 @@ func TestRenderGitHubStepSummaryIncludesFailingBlocks(t *testing.T) {
 			ID:          "fail",
 			QualifiedID: "README.md#fail",
 			File:        "README.md",
+			Line:        12,
+			Source:      "go test ./internal/greeter",
 			Result:      "failed",
 			ExitCode:    1,
 			Reason:      "exit-code",
+			Runner:      "local",
+			Timeout:     "120s",
+			StderrTail:  "package ./internal/greeter is not in std\n",
 		}},
 	}
 
 	summary := RenderGitHubStepSummary(r, StepSummaryOptions{Mode: "run", Status: 1, ReportJSONPath: "report.json"})
-	for _, want := range []string{"result: failed", "### Failing Blocks", "README.md#fail", "exit-code"} {
+	for _, want := range []string{
+		"result: failed",
+		"### Failing Blocks",
+		"| Block | Location | Result | Exit | Reason |",
+		"README.md#fail",
+		"README.md:12",
+		"exit-code",
+		"### Failure Details",
+		"next command: setupproof review README.md",
+		"go test ./internal/greeter",
+		"Stderr tail:",
+		"package ./internal/greeter is not in std",
+	} {
 		if !strings.Contains(summary, want) {
 			t.Fatalf("summary missing %q:\n%s", want, summary)
 		}

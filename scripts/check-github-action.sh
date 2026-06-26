@@ -121,11 +121,17 @@ if [ "${1:-}" = "report" ]; then
   printf -- '- exit code: %s\n' "${exit_code:-$status}"
   printf -- '- report JSON: `%s`\n\n' "$report_json"
   printf '### Failing Blocks\n\n'
-  printf '| Block | Result | Exit | Reason |\n'
-  printf '| --- | --- | ---: | --- |\n'
+  printf '| Block | Location | Result | Exit | Reason |\n'
+  printf '| --- | --- | --- | ---: | --- |\n'
   { printf '%s' "$report" | grep -o 'README.md#b[0-9][0-9]*' || true; } | head -n 15 | while IFS= read -r block_id; do
-    printf '| %s | failed | 1 | exit-code |\n' "$block_id"
+    printf '| %s | README.md:1 | failed | 1 | exit-code |\n' "$block_id"
   done
+  printf '\n### Failure Details\n\n'
+  printf '#### README.md#b1\n\n'
+  printf -- '- location: README.md:1\n'
+  printf -- '- runner: action-local\n'
+  printf -- '- timeout: 120s\n'
+  printf -- '- next command: setupproof review README.md\n'
   exit 0
 fi
 
@@ -301,6 +307,8 @@ test_failure_propagates_and_wraps_logs() {
 
   [ "$(cat "$dir/status")" = "1" ] || fail "action did not propagate SetupProof exit code"
   assert_contains "$dir/summary" "result: failed"
+  assert_contains "$dir/summary" "Failure Details"
+  assert_contains "$dir/summary" "next command: setupproof review README.md"
   assert_contains "$dir/stdout" "::stop-commands::"
   assert_contains "$dir/stdout" "::"
 }
@@ -461,8 +469,8 @@ test_summary_is_bounded() {
   assert_contains "$dir/summary" "Failing Blocks"
 }
 
-test_summary_fallback_without_python_keeps_block_details() {
-  local dir="$TMP_ROOT/summary-no-python"
+test_summary_renderer_keeps_block_details() {
+  local dir="$TMP_ROOT/summary-renderer"
   local fake="$dir/fake"
   mkdir -p "$dir"
   make_fake_cli "$fake"
@@ -478,7 +486,9 @@ test_summary_fallback_without_python_keeps_block_details() {
   [ "$(cat "$dir/status")" = "1" ] || fail "fallback summary run should return fake failure"
   assert_contains "$dir/summary" "Failing Blocks"
   assert_contains "$dir/summary" "README.md#b1"
+  assert_contains "$dir/summary" "README.md:1"
   assert_contains "$dir/summary" "exit-code"
+  assert_contains "$dir/summary" "next command: setupproof review README.md"
 }
 
 test_no_secret_default_workflow_shape() {
@@ -512,7 +522,7 @@ test_requires_cli_path_or_explicit_version
 test_download_and_checksum_handling
 test_rejects_unsafe_cli_version
 test_summary_is_bounded
-test_summary_fallback_without_python_keeps_block_details
+test_summary_renderer_keeps_block_details
 test_no_secret_default_workflow_shape
 
 printf 'github action checks passed\n'
