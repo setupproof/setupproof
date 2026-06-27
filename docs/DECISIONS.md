@@ -6,7 +6,7 @@ in `docs/adr/`.
 ## Runtime
 
 SetupProof uses a Go CLI. The GitHub Action is a composite Action that invokes
-the CLI. v0.1.1 is distributed through `go install`, GitHub release archives,
+the CLI. v0.1.2 is distributed through `go install`, GitHub release archives,
 and a pinned composite Action. The release tooling also stages and smoke-tests
 an npm tarball; npm registry publication and operating-system package managers
 remain deferred until those packages exist.

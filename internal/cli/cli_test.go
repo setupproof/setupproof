@@ -732,8 +732,8 @@ func TestInitWorkflowPrintsConservativeWorkflowOnly(t *testing.T) {
 		"permissions:\n  contents: read",
 		"runs-on: ubuntu-24.04",
 		"uses: actions/checkout@v4",
-		"uses: setupproof/setupproof@v0.1.1",
-		"cli-version: v0.1.1",
+		"uses: setupproof/setupproof@v0.1.2",
+		"cli-version: v0.1.2",
 		"mode: review",
 		"require-blocks: \"true\"",
 		"files: |\n            README.md",
@@ -785,8 +785,8 @@ func TestInitWorkflowWritesExternalRepoWorkflow(t *testing.T) {
 	workflow := readCLIFile(t, filepath.Join(dir, ".github", "workflows", "setupproof.yml"))
 	for _, want := range []string{
 		"uses: actions/checkout@v4",
-		"uses: setupproof/setupproof@v0.1.1",
-		"cli-version: v0.1.1",
+		"uses: setupproof/setupproof@v0.1.2",
+		"cli-version: v0.1.2",
 		"require-blocks: \"true\"",
 		"files: |\n            README.md",
 	} {

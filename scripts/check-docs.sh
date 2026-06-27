@@ -68,15 +68,15 @@ assert_contains "$DOC" "<!-- ci-snippet:generic-shell -->"
 assert_contains "$DOC" "Native Windows execution is unsupported in v0.1"
 assert_contains "$DOC" "PowerShell fenced blocks are unsupported in v0.1"
 assert_contains "$DOC" "WSL2"
-assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.1"
-assert_contains "$DOC" "setupproof_0.1.1_checksums.txt"
+assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.2"
+assert_contains "$DOC" "setupproof_0.1.2_checksums.txt"
 assert_contains "$DOC" "setupproof review README.md"
 assert_contains "$DOC" "setupproof --report-json setupproof-report.json --require-blocks --no-color --no-glyphs README.md"
 assert_contains "$DOC" "require-blocks: \"true\""
 assert_contains "$ROOT/LICENSE" "Apache License"
 assert_contains "$ROOT/NOTICE" "Licensed under the Apache License, Version 2.0."
 assert_contains "$ROOT/README.md" 'Apache License, Version 2.0 (`Apache-2.0`)'
-assert_contains "$ROOT/README.md" "setupproof/setupproof@v0.1.1"
+assert_contains "$ROOT/README.md" "setupproof/setupproof@v0.1.2"
 assert_contains "$ROOT/examples/node-npm/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/package.json" '"license": "Apache-2.0"'
 assert_contains "$ROOT/examples/monorepo/packages/web/package.json" '"license": "Apache-2.0"'

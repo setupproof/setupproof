@@ -6,4 +6,4 @@ const (
 )
 
 // Version is a var so release builds can override it with -ldflags.
-var Version = "0.1.1"
+var Version = "0.1.2"

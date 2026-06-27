@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2 - 2026-06-27
+
+- Changed `setupproof init --workflow` to generate the released Action
+  workflow for normal repositories.
+- Pinned generated workflows to the current Action tag and matching
+  `cli-version`.
+- Updated onboarding docs and tests for external repository setup.
+
 ## 0.1.1 - 2026-06-26
 
 - Added a failing Go fixture that demonstrates README drift detection.

@@ -17,9 +17,9 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 	doc := string(data)
 
 	for _, want := range []string{
-		"SetupProof v0.1.1 ships as a Go module",
-		"go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.1",
-		"setupproof_0.1.1_checksums.txt",
+		"SetupProof v0.1.2 ships as a Go module",
+		"go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.2",
+		"setupproof_0.1.2_checksums.txt",
 		"Native Windows execution is unsupported in v0.1",
 		"SetupProof through WSL2",
 		"PowerShell fenced blocks are unsupported in v0.1.",
@@ -53,8 +53,8 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 		"permissions:\n  contents: read",
 		"timeout-minutes: 10",
 		"uses: actions/checkout@v4",
-		"uses: setupproof/setupproof@v0.1.1",
-		"cli-version: v0.1.1",
+		"uses: setupproof/setupproof@v0.1.2",
+		"cli-version: v0.1.2",
 		"mode: review",
 		"require-blocks: \"true\"",
 	} {
