@@ -62,6 +62,7 @@ func runPreparedDocker(req planning.Request, plan planning.Plan, opts Options, s
 	if !ok {
 		return executionRun{code: code, warnings: warnings, runnerError: runnerError}
 	}
+	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
 
 	ctx, stop, signalReason := interruptContext()
 	defer stop()
@@ -75,7 +76,7 @@ func runPreparedDocker(req planning.Request, plan planning.Plan, opts Options, s
 		if len(blocks) == 0 {
 			continue
 		}
-		fileCode, fileReports, fileRunnerError := runDockerFile(ctx, file, blocks, plan.Env, source, opts, stderr, imageRecorder, signalReason)
+		fileCode, fileReports, fileRunnerError := runDockerFile(ctx, file, blocks, plan.Env, source, opts, stderr, progress, imageRecorder, signalReason)
 		blockReports = append(blockReports, fileReports...)
 		if fileCode == 2 || fileCode == 3 {
 			return executionRun{code: fileCode, blocks: blockReports, warnings: warnings, runnerError: fileRunnerError}
@@ -109,7 +110,7 @@ func validateDockerPlan(plan planning.Plan) error {
 	return nil
 }
 
-func runDockerFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, imageRecorder *dockerImageRecorder, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
+func runDockerFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, imageRecorder *dockerImageRecorder, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
 	sharedWorkspace, err := createDockerWorkspace(source)
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", file, err)
@@ -156,18 +157,18 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		}
 	}()
 
-	startContainer := func(block planning.Block) (int, string) {
+	startContainer := func(block planning.Block, blockStderr io.Writer) (int, string) {
 		if err := ensureDockerWorkspaceDirs(sharedWorkspace); err != nil {
-			fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", file, err)
+			fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", file, err)
 			return 3, "workspace_setup_failed"
 		}
-		started, reason, err := startDockerContainer(ctx, sharedWorkspace, block.Options.DockerImage, state.env, block.Options.NetworkPolicy, stderr, secretValues)
+		started, reason, err := startDockerContainer(ctx, sharedWorkspace, block.Options.DockerImage, state.env, block.Options.NetworkPolicy, blockStderr, secretValues)
 		if err != nil {
-			fmt.Fprintln(stderr, err)
+			fmt.Fprintln(blockStderr, err)
 			return 3, reason
 		}
 		container = started
-		imageRecorder.record(ctx, block.Options.DockerImage, stderr)
+		imageRecorder.record(ctx, block.Options.DockerImage, blockStderr)
 		return 0, ""
 	}
 
@@ -176,6 +177,8 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 			blockReports = append(blockReports, reportBlock(block, blockOutcome{result: "skipped", reason: "fail-fast"}, report.Output{}, 0))
 			continue
 		}
+		span := progress.Start(block)
+		blockStderr := progress.OutputWriter()
 
 		activeWorkspace := sharedWorkspace
 		activeState := state
@@ -186,43 +189,49 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		if isolated {
 			activeWorkspace, err = createDockerWorkspace(source)
 			if err != nil {
-				fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				span.Finish("error", 0)
 				return 3, blockReports, "workspace_setup_failed"
 			}
 			if opts.KeepWorkspace {
-				fmt.Fprint(stderr, keepWorkspaceWarning(block.QualifiedID, activeWorkspace.repoRoot))
+				fmt.Fprint(blockStderr, keepWorkspaceWarning(block.QualifiedID, activeWorkspace.repoRoot))
 			}
-			isolatedEnv, isolatedSecrets, err := baselineDockerEnv(envPlan, stderr)
+			isolatedEnv, isolatedSecrets, err := baselineDockerEnv(envPlan, blockStderr)
 			if err != nil {
 				_ = activeWorkspace.cleanup(opts.KeepWorkspace)
-				fmt.Fprintln(stderr, err)
+				fmt.Fprintln(blockStderr, err)
+				span.Finish("error", 0)
 				return 2, blockReports, ""
 			}
 			blockSecrets = append(append([]string(nil), secretValues...), isolatedSecrets...)
 			activeState = fileState{cwd: containerWorkspaceRoot, env: isolatedEnv}
 			if err := ensureDockerWorkspaceDirs(activeWorkspace); err != nil {
 				_ = activeWorkspace.cleanup(opts.KeepWorkspace)
-				fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				span.Finish("error", 0)
 				return 3, blockReports, "workspace_setup_failed"
 			}
 			var startReason string
-			activeContainer, startReason, err = startDockerContainer(ctx, activeWorkspace, block.Options.DockerImage, activeState.env, block.Options.NetworkPolicy, stderr, blockSecrets)
+			activeContainer, startReason, err = startDockerContainer(ctx, activeWorkspace, block.Options.DockerImage, activeState.env, block.Options.NetworkPolicy, blockStderr, blockSecrets)
 			if err != nil {
 				blockReports = append(blockReports, reportBlock(block, blockOutcome{result: "error", reason: startReason}, report.Output{}, 0))
 				_ = activeWorkspace.cleanup(opts.KeepWorkspace)
-				fmt.Fprintln(stderr, err)
+				fmt.Fprintln(blockStderr, err)
+				span.Finish("error", 0)
 				return 3, blockReports, startReason
 			}
-			imageRecorder.record(ctx, block.Options.DockerImage, stderr)
+			imageRecorder.record(ctx, block.Options.DockerImage, blockStderr)
 		} else if activeContainer == nil {
-			if code, reason := startContainer(block); code != 0 {
+			if code, reason := startContainer(block, blockStderr); code != 0 {
 				blockReports = append(blockReports, reportBlock(block, blockOutcome{result: "error", reason: reason}, report.Output{}, 0))
+				span.Finish("error", 0)
 				return code, blockReports, reason
 			}
 			activeContainer = container
 		}
 
-		outcome, nextState, containerAlive, output, durationMs := runDockerBlock(ctx, block, activeContainer, activeWorkspace, activeState, stderr, blockSecrets)
+		outcome, nextState, containerAlive, output, durationMs := runDockerBlock(ctx, block, activeContainer, activeWorkspace, activeState, blockStderr, blockSecrets)
+		span.Finish(outcome.result, durationMs)
 		blockReports = append(blockReports, reportBlock(block, outcome, output, durationMs))
 
 		if isolated {

@@ -434,6 +434,31 @@ func TestDefaultCommandRunsActionLocalRunnerInGitWorktree(t *testing.T) {
 	}
 }
 
+func TestTerminalProgressRequiresInteractiveOutput(t *testing.T) {
+	var stderr bytes.Buffer
+	if terminalProgressEnabled(&stderr, parsedArgs{}) {
+		t.Fatal("progress should be disabled for non-terminal stderr")
+	}
+	tmp := filepath.Join(t.TempDir(), "stderr.log")
+	file, err := os.Create(tmp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	if terminalProgressEnabled(file, parsedArgs{}) {
+		t.Fatal("progress should be disabled for regular files")
+	}
+	for _, opts := range []parsedArgs{
+		{json: true},
+		{noColor: true},
+		{noGlyphs: true},
+	} {
+		if terminalProgressEnabled(os.Stderr, opts) {
+			t.Fatalf("progress should be disabled for opts %#v", opts)
+		}
+	}
+}
+
 func TestSuggestPrintsCandidatesAndDoesNotExecute(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)

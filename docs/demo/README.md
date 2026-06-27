@@ -8,7 +8,8 @@ The GIF shows the maintainer path:
 
 1. inspect the marked README quickstart;
 2. review execution semantics without running commands;
-3. run the marked block in a copied workspace.
+3. run the marked block in a copied workspace with the interactive progress
+   line visible.
 
 Regenerate the GIF:
 

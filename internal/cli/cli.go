@@ -476,6 +476,7 @@ func runExecution(opts parsedArgs, stdout io.Writer, stderr io.Writer) int {
 		KeepWorkspace: opts.keepWorkspace,
 		NoColor:       opts.noColor || os.Getenv("NO_COLOR") != "",
 		NoGlyphs:      opts.noGlyphs,
+		Progress:      terminalProgressEnabled(stderr, opts),
 	}, stderr)
 	if executionReport.Kind == "" {
 		return code
@@ -514,6 +515,21 @@ func runExecution(opts parsedArgs, stdout io.Writer, stderr io.Writer) int {
 		return 3
 	}
 	return code
+}
+
+func terminalProgressEnabled(stderr io.Writer, opts parsedArgs) bool {
+	if opts.json || opts.noColor || opts.noGlyphs || os.Getenv("NO_COLOR") != "" || os.Getenv("CI") != "" || os.Getenv("TERM") == "dumb" {
+		return false
+	}
+	file, ok := stderr.(*os.File)
+	if !ok {
+		return false
+	}
+	info, err := file.Stat()
+	if err != nil {
+		return false
+	}
+	return info.Mode()&os.ModeCharDevice != 0
 }
 
 func resolveReportPaths(opts parsedArgs) (string, string, error) {
