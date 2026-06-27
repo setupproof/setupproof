@@ -61,11 +61,13 @@
       <text x="72" y="208" fill="#cbd5e1">workspace copy: tracked</text>
       <text x="72" y="240" fill="#cbd5e1">shell: sh</text>
       <text x="72" y="272" fill="#cbd5e1">timeout: 120s</text>
-      <text x="46" y="326" fill="#e5e7eb">$ setupproof --require-blocks README.md</text>
+      <text x="46" y="326" fill="#e5e7eb">$ setupproof README.md</text>
     </g>
 
-    <rect x="46" y="344" width="394" height="36" rx="8" fill="#0f766e"/>
-    <text x="62" y="369" fill="#ffffff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="700">[passed] README.md#quickstart</text>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
+      <text x="46" y="358" fill="#86efac" font-weight="700">+ SetupProof passed</text>
+      <text x="72" y="386" fill="#cbd5e1">1 block, 1 file, 42ms</text>
+    </g>
   </g>
 
   <g transform="translate(82 588)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#546179">

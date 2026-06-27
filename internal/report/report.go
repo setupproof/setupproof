@@ -149,6 +149,61 @@ func RenderTerminal(w io.Writer, r Report, opts TerminalOptions) error {
 		_, err := fmt.Fprintln(w, "No marked blocks found.")
 		return err
 	}
+	if opts.NoGlyphs {
+		return renderTerminalRows(w, r, opts)
+	}
+	if len(r.Blocks) == 0 && r.Result == "error" {
+		if _, err := fmt.Fprintf(w, "%sSetupProof %s\n", terminalStatusPrefix(r.Result, opts), r.Result); err != nil {
+			return err
+		}
+		var details []string
+		if r.Runner.Kind != "" {
+			details = append(details, "runner="+r.Runner.Kind)
+		}
+		if r.Runner.Error != nil && r.Runner.Error.Reason != "" {
+			details = append(details, "reason="+r.Runner.Error.Reason)
+		}
+		if len(details) > 0 {
+			if _, err := fmt.Fprintf(w, "  %s\n", strings.Join(details, " ")); err != nil {
+				return err
+			}
+		}
+		if next := doctorCommand(r.Files); next != "" {
+			_, err := fmt.Fprintf(w, "  next command: %s\n", next)
+			return err
+		}
+		return nil
+	}
+	if _, err := fmt.Fprintf(w, "%sSetupProof %s\n", terminalStatusPrefix(r.Result, opts), r.Result); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "  %s, %s, %s\n\n", terminalCount(len(r.Blocks), "block"), terminalCount(len(r.Files), "file"), terminalDuration(r.DurationMs)); err != nil {
+		return err
+	}
+	for index, block := range r.Blocks {
+		if index > 0 {
+			if _, err := fmt.Fprintln(w); err != nil {
+				return err
+			}
+		}
+		if _, err := fmt.Fprintf(w, "%s%s\n", terminalStatusPrefix(block.Result, opts), summaryBlockID(block)); err != nil {
+			return err
+		}
+		for _, details := range terminalBlockDetailLines(block) {
+			if _, err := fmt.Fprintf(w, "  %s\n", details); err != nil {
+				return err
+			}
+		}
+		if needsTerminalGuidance(block.Result) {
+			if _, err := fmt.Fprintf(w, "  next command: %s\n", reviewCommand(block.File)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func renderTerminalRows(w io.Writer, r Report, opts TerminalOptions) error {
 	if len(r.Blocks) == 0 && r.Result == "error" {
 		line := "SetupProof runner error"
 		if r.Runner.Kind != "" {
@@ -197,6 +252,61 @@ func RenderTerminal(w io.Writer, r Report, opts TerminalOptions) error {
 		}
 	}
 	return nil
+}
+
+func terminalBlockDetailLines(block Block) []string {
+	var lines []string
+	if location := summaryLocation(block); location != "" {
+		lines = append(lines, "file="+location)
+	}
+	var runnerFields []string
+	if block.Runner != "" {
+		runnerFields = append(runnerFields, "runner="+block.Runner)
+	}
+	if block.DockerImage != "" {
+		runnerFields = append(runnerFields, "image="+block.DockerImage)
+	}
+	if len(runnerFields) > 0 {
+		lines = append(lines, strings.Join(runnerFields, " "))
+	}
+	var resultFields []string
+	if block.Timeout != "" {
+		resultFields = append(resultFields, "timeout="+block.Timeout)
+	}
+	if block.Result != "" {
+		resultFields = append(resultFields, "result="+block.Result)
+	}
+	if block.Result == "failed" || block.Result == "timeout" {
+		resultFields = append(resultFields, fmt.Sprintf("exit=%d", block.ExitCode))
+	}
+	if block.Reason != "" {
+		resultFields = append(resultFields, "reason="+block.Reason)
+	}
+	if block.InteractiveCommand != "" {
+		resultFields = append(resultFields, "command="+block.InteractiveCommand)
+	}
+	if block.CleanupCompleted != nil {
+		resultFields = append(resultFields, fmt.Sprintf("cleanupCompleted=%t", *block.CleanupCompleted))
+	}
+	if len(resultFields) > 0 {
+		lines = append(lines, strings.Join(resultFields, " "))
+	}
+	return lines
+}
+
+func terminalCount(count int, singular string) string {
+	label := singular
+	if count != 1 {
+		label += "s"
+	}
+	return fmt.Sprintf("%d %s", count, label)
+}
+
+func terminalDuration(ms int64) string {
+	if ms < 1000 {
+		return fmt.Sprintf("%dms", ms)
+	}
+	return (time.Duration(ms) * time.Millisecond).String()
 }
 
 func terminalStatusPrefix(result string, opts TerminalOptions) string {

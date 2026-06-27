@@ -38,9 +38,15 @@ README.md#quickstart
     printf 'run tests\n'
     test -f README.md
 
-$ setupproof --require-blocks --no-color --no-glyphs README.md
+$ setupproof --require-blocks --no-color README.md
 install dependencies
 run tests
-[passed] README.md#quickstart file=README.md:12 runner=local timeout=120s result=passed
++ SetupProof passed
+  1 block, 1 file, 2.046s
+
++ README.md#quickstart
+  file=README.md:12
+  runner=local
+  timeout=120s result=passed
 
 Demo complete.

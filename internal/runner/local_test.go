@@ -551,8 +551,20 @@ func assertNoWorkspaces(t *testing.T, parent string) {
 }
 
 func blockLineContains(output string, blockID string, want string) bool {
+	inBlock := false
 	for _, line := range strings.Split(output, "\n") {
-		if strings.Contains(line, blockID) && strings.Contains(line, want) {
+		if strings.Contains(line, blockID) {
+			if strings.Contains(line, want) {
+				return true
+			}
+			inBlock = true
+			continue
+		}
+		if strings.TrimSpace(line) == "" {
+			inBlock = false
+			continue
+		}
+		if inBlock && strings.Contains(line, want) {
 			return true
 		}
 	}

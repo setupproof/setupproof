@@ -32,7 +32,14 @@ If that setup path breaks, the failure points back to the README block people
 would have copied:
 
 ```text
-[failed] README.md#quickstart file=README.md:18 runner=local timeout=120s result=failed exit=1
+! SetupProof failed
+  1 block, 1 file, 742ms
+
+! README.md#quickstart
+  file=README.md:18
+  runner=local
+  timeout=120s result=failed exit=1
+  next command: setupproof review README.md
 ```
 
 The goal is not to lint Markdown. The goal is to keep the public setup path
@@ -79,10 +86,26 @@ setupproof review README.md
 Run the marked blocks:
 
 ```sh
-setupproof --require-blocks --no-color --no-glyphs README.md
+setupproof README.md
 ```
 
-Typical output is intentionally plain:
+Typical local output is compact and scan-friendly:
+
+```text
++ SetupProof passed
+  1 block, 1 file, 35ms
+
++ README.md#quickstart
+  file=README.md:12
+  runner=local
+  timeout=120s result=passed
+```
+
+For deterministic CI logs, keep the plain format:
+
+```sh
+setupproof --require-blocks --no-color --no-glyphs README.md
+```
 
 ```text
 [passed] README.md#quickstart file=README.md:12 runner=local timeout=120s result=passed
