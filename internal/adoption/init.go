@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/setupproof/setupproof/internal/app"
 	"github.com/setupproof/setupproof/internal/diag"
 	"github.com/setupproof/setupproof/internal/markdown"
 	"github.com/setupproof/setupproof/internal/planning"
@@ -39,11 +40,6 @@ func Init(req planning.Request, opts InitOptions, stdout io.Writer, stderr io.Wr
 		Data:    []byte(defaultConfig(files)),
 	})
 	if opts.Workflow {
-		if err := validateSourceTreeWorkflowRoot(resolver.Root); err != nil {
-			fmt.Fprintln(stderr, err)
-			return 2
-		}
-		fmt.Fprintln(stderr, "warning: generated workflow is source-tree-only; use it only in this repository or a root that vendors SetupProof action files")
 		workflowPath := filepath.Join(resolver.Root, ".github", "workflows", "setupproof.yml")
 		writes = append(writes, initWrite{
 			Path:    workflowPath,
@@ -98,6 +94,7 @@ func PrintWorkflow(req planning.Request, stdout io.Writer, stderr io.Writer) int
 
 func workflowContent(files []string) string {
 	fileInput := workflowFilesInput(files)
+	actionVersion := workflowActionVersion()
 	return fmt.Sprintf(`name: SetupProof
 
 on:
@@ -114,31 +111,22 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      # Source-tree workflow: see docs/adr/0009-github-actions-checkout-strategy.md.
       - name: Checkout repository
-        shell: bash
-        run: |
-          git init .
-          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
-          git fetch --depth=1 origin "$GITHUB_SHA"
-          git checkout --detach FETCH_HEAD
-      - name: Build SetupProof CLI
-        shell: bash
-        run: go build -o "$RUNNER_TEMP/setupproof" ./cmd/setupproof
+        uses: actions/checkout@v4
       - name: Review marked quickstarts
-        uses: ./
+        uses: setupproof/setupproof@%s
         with:
-          cli-path: ${{ runner.temp }}/setupproof
+          cli-version: %s
           mode: review
           require-blocks: "true"
           files:%s
       - name: Run marked quickstarts
-        uses: ./
+        uses: setupproof/setupproof@%s
         with:
-          cli-path: ${{ runner.temp }}/setupproof
+          cli-version: %s
           require-blocks: "true"
           files:%s
-`, fileInput, fileInput)
+`, actionVersion, actionVersion, fileInput, actionVersion, actionVersion, fileInput)
 }
 
 func workflowFiles(req planning.Request) ([]string, error) {
@@ -154,27 +142,6 @@ func workflowFiles(req planning.Request) ([]string, error) {
 		files = append(files, target.Rel)
 	}
 	return files, nil
-}
-
-func validateSourceTreeWorkflowRoot(root string) error {
-	required := []string{
-		filepath.Join(root, "action.yml"),
-		filepath.Join(root, "cmd", "setupproof", "main.go"),
-		filepath.Join(root, "scripts", "github-action.sh"),
-	}
-	for _, path := range required {
-		info, err := os.Stat(path)
-		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				return fmt.Errorf("init --workflow is source-tree-only until release archives exist; expected %s", filepath.ToSlash(path))
-			}
-			return err
-		}
-		if info.IsDir() {
-			return fmt.Errorf("init --workflow is source-tree-only until release archives exist; expected file %s", filepath.ToSlash(path))
-		}
-	}
-	return nil
 }
 
 type initWrite struct {
@@ -320,4 +287,12 @@ func workflowFilesInput(files []string) string {
 		builder.WriteString(file)
 	}
 	return builder.String()
+}
+
+func workflowActionVersion() string {
+	version := strings.TrimSpace(app.Version)
+	if strings.HasPrefix(version, "v") {
+		return version
+	}
+	return "v" + version
 }

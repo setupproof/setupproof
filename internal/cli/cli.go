@@ -625,6 +625,7 @@ Usage:
   %s doctor <markdown files...>
   %s init [--force] [markdown files...]
   %s init --check
+  %s init --workflow [--force] [markdown files...]
   %s init --workflow --print
   %s report --format=github-step-summary
   %s --help
@@ -646,6 +647,6 @@ Flags:
   --no-glyphs              Use text status labels instead of symbols.
 
 SetupProof supports local, action-local, and Docker runners with terminal, Markdown, and JSON execution reports.
-`, app.DisplayName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName)
+`, app.DisplayName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName, app.CommandName)
 	_, _ = stdout.Write(buffer.Bytes())
 }
