@@ -196,6 +196,7 @@
       .demo img {
         display: block;
         width: min(100%, 980px);
+        max-width: 100%;
         height: auto;
         border: 1px solid #18212f;
         background: #0f172a;
@@ -247,8 +248,30 @@
         gap: 18px;
       }
 
+      .terminal-pair pre {
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      .terminal-note {
+        margin: -2px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .hero > *,
+      .proof > *,
+      .cases > *,
+      .workflow-grid > *,
+      .terminal-pair > *,
+      .final > * {
+        min-width: 0;
+      }
+
       pre {
         margin: 0;
+        max-width: 100%;
+        min-width: 0;
         overflow-x: auto;
         border: 1px solid #1f2937;
         background: #111827;
@@ -545,9 +568,19 @@
 npm ci
 npm test
 ```</code></pre>
-          <pre><code><span class="fail">[failed]</span> README.md#quickstart file=README.md:18 runner=local timeout=120s result=failed exit=1
+          <pre><code><span class="fail">!</span> SetupProof failed
+  1 block, 1 file, 742ms
 
-Fix the setup path once, in the same place contributors read it.</code></pre>
+<span class="fail">!</span> README.md#quickstart
+  file=README.md:18
+  runner=local
+  timeout=120s result=failed
+  exit=1
+  next command:
+    setupproof review README.md</code></pre>
+          <p class="terminal-note">
+            Fix the setup path once, in the same place contributors read it.
+          </p>
         </div>
       </section>
 

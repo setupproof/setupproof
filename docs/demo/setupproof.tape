@@ -33,6 +33,6 @@ Type "setupproof review README.md"
 Enter
 Sleep 1300ms
 
-Type "setupproof --require-blocks --no-color --no-glyphs README.md"
+Type "setupproof --require-blocks README.md"
 Enter
 Sleep 1800ms

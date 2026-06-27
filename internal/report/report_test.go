@@ -182,10 +182,12 @@ func TestRenderMarkdownUsesFenceLongerThanContent(t *testing.T) {
 
 func TestRenderTerminalOptionsControlStatusPrefix(t *testing.T) {
 	r := Report{
-		Result:    "failed",
-		ExitCode:  1,
-		Workspace: planning.Workspace{Mode: "temporary"},
-		Runner:    planning.Runner{Kind: "local"},
+		Result:     "failed",
+		ExitCode:   1,
+		DurationMs: 42,
+		Workspace:  planning.Workspace{Mode: "temporary"},
+		Runner:     planning.Runner{Kind: "local"},
+		Files:      []string{"README.md"},
 		Blocks: []Block{{
 			ID:          "fail",
 			QualifiedID: "README.md#fail",
@@ -206,6 +208,19 @@ func TestRenderTerminalOptionsControlStatusPrefix(t *testing.T) {
 	if !strings.Contains(colored.String(), "\x1b[31m!") {
 		t.Fatalf("colored terminal output missing failure prefix: %q", colored.String())
 	}
+	for _, want := range []string{
+		"SetupProof failed",
+		"1 block, 1 file, 42ms",
+		"README.md#fail",
+		"file=README.md:1",
+		"runner=local",
+		"timeout=120s result=failed exit=1 reason=exit-code",
+		"next command: setupproof review README.md",
+	} {
+		if !strings.Contains(colored.String(), want) {
+			t.Fatalf("colored terminal output missing %q:\n%s", want, colored.String())
+		}
+	}
 
 	var plain bytes.Buffer
 	if err := RenderTerminal(&plain, r, TerminalOptions{NoColor: true, NoGlyphs: true}); err != nil {
@@ -216,6 +231,63 @@ func TestRenderTerminalOptionsControlStatusPrefix(t *testing.T) {
 	}
 	if !strings.Contains(plain.String(), "[failed] README.md#fail") {
 		t.Fatalf("plain terminal output missing text status prefix: %q", plain.String())
+	}
+	if strings.Contains(plain.String(), "SetupProof failed") {
+		t.Fatalf("plain terminal output should keep compact row format: %q", plain.String())
+	}
+}
+
+func TestRenderTerminalDefaultOutputSeparatesBlocks(t *testing.T) {
+	r := Report{
+		Result:     "passed",
+		ExitCode:   0,
+		DurationMs: 1200,
+		Workspace:  planning.Workspace{Mode: "temporary"},
+		Runner:     planning.Runner{Kind: "local"},
+		Files:      []string{"README.md", "docs/INSTALL.md"},
+		Blocks: []Block{
+			{
+				ID:          "quickstart",
+				QualifiedID: "README.md#quickstart",
+				File:        "README.md",
+				Line:        12,
+				Runner:      "local",
+				Timeout:     "120s",
+				Result:      "passed",
+			},
+			{
+				ID:          "install",
+				QualifiedID: "docs/INSTALL.md#install",
+				File:        "docs/INSTALL.md",
+				Line:        34,
+				Runner:      "docker",
+				DockerImage: "alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+				Timeout:     "60s",
+				Result:      "passed",
+			},
+		},
+	}
+
+	var out bytes.Buffer
+	if err := RenderTerminal(&out, r, TerminalOptions{NoColor: true}); err != nil {
+		t.Fatal(err)
+	}
+	rendered := out.String()
+	for _, want := range []string{
+		"+ SetupProof passed",
+		"2 blocks, 2 files, 1.2s",
+		"+ README.md#quickstart",
+		"file=README.md:12",
+		"runner=local",
+		"timeout=120s result=passed",
+		"+ docs/INSTALL.md#install",
+		"file=docs/INSTALL.md:34",
+		"runner=docker image=alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		"timeout=60s result=passed",
+	} {
+		if !strings.Contains(rendered, want) {
+			t.Fatalf("terminal output missing %q:\n%s", want, rendered)
+		}
 	}
 }
 

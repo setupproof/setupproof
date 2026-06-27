@@ -77,7 +77,7 @@ pause
 run_setupproof suggest README.md
 run_setupproof --list README.md
 run_setupproof review README.md
-run_setupproof --require-blocks --no-color --no-glyphs README.md
+run_setupproof --require-blocks --no-color README.md
 
 pause
 printf '\nDemo complete.\n'
