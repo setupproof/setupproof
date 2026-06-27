@@ -103,6 +103,12 @@ runner, a 120 second timeout, `defaults.requireBlocks: true`, and no secret
 environment passthrough. Existing files are not overwritten unless `--force` is
 passed.
 
+Create the config and a pinned GitHub Actions workflow together:
+
+```sh
+setupproof init --workflow
+```
+
 Use non-executing inspection while adding markers:
 
 ```sh

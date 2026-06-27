@@ -731,12 +731,11 @@ func TestInitWorkflowPrintsConservativeWorkflowOnly(t *testing.T) {
 		"pull_request:",
 		"permissions:\n  contents: read",
 		"runs-on: ubuntu-24.04",
-		"docs/adr/0009-github-actions-checkout-strategy.md",
-		"go build -o \"$RUNNER_TEMP/setupproof\" ./cmd/setupproof",
-		"uses: ./",
+		"uses: actions/checkout@v4",
+		"uses: setupproof/setupproof@v0.1.1",
+		"cli-version: v0.1.1",
 		"mode: review",
 		"require-blocks: \"true\"",
-		"cli-path: ${{ runner.temp }}/setupproof",
 		"files: |\n            README.md",
 	} {
 		if !strings.Contains(output, want) {
@@ -749,6 +748,16 @@ func TestInitWorkflowPrintsConservativeWorkflowOnly(t *testing.T) {
 	if strings.Contains(output, "github.token") {
 		t.Fatalf("workflow should not depend on the default token:\n%s", output)
 	}
+	for _, forbidden := range []string{
+		"go build -o",
+		"uses: ./",
+		"cli-path:",
+		"source-tree",
+	} {
+		if strings.Contains(output, forbidden) {
+			t.Fatalf("workflow output contains source-tree detail %q:\n%s", forbidden, output)
+		}
+	}
 	if _, err := os.Stat("setupproof.yml"); !os.IsNotExist(err) {
 		t.Fatalf("init --workflow --print wrote config: %v", err)
 	}
@@ -757,28 +766,47 @@ func TestInitWorkflowPrintsConservativeWorkflowOnly(t *testing.T) {
 	}
 }
 
-func TestInitWorkflowRejectsDownstreamRoot(t *testing.T) {
+func TestInitWorkflowWritesExternalRepoWorkflow(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
 
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
 	code := Run([]string{"init", "--workflow"}, &stdout, &stderr)
-	if code != 2 {
-		t.Fatalf("exit code = %d", code)
+	if code != 0 {
+		t.Fatalf("exit code = %d, stderr = %q", code, stderr.String())
 	}
-	if !strings.Contains(stderr.String(), "init --workflow is source-tree-only") {
+	if stderr.String() != "" {
 		t.Fatalf("stderr = %q", stderr.String())
 	}
-	if _, err := os.Stat("setupproof.yml"); !os.IsNotExist(err) {
-		t.Fatalf("init wrote config after workflow root check failed: %v", err)
+	if !strings.Contains(stdout.String(), "wrote setupproof.yml") || !strings.Contains(stdout.String(), "wrote .github/workflows/setupproof.yml") {
+		t.Fatalf("stdout = %q", stdout.String())
+	}
+	workflow := readCLIFile(t, filepath.Join(dir, ".github", "workflows", "setupproof.yml"))
+	for _, want := range []string{
+		"uses: actions/checkout@v4",
+		"uses: setupproof/setupproof@v0.1.1",
+		"cli-version: v0.1.1",
+		"require-blocks: \"true\"",
+		"files: |\n            README.md",
+	} {
+		if !strings.Contains(workflow, want) {
+			t.Fatalf("workflow missing %q:\n%s", want, workflow)
+		}
+	}
+	for _, forbidden := range []string{"go build -o", "uses: ./", "cli-path:", "source-tree"} {
+		if strings.Contains(workflow, forbidden) {
+			t.Fatalf("workflow contains source-tree detail %q:\n%s", forbidden, workflow)
+		}
+	}
+	if config := readCLIFile(t, filepath.Join(dir, "setupproof.yml")); !strings.Contains(config, "  - README.md\n") {
+		t.Fatalf("config missing default file:\n%s", config)
 	}
 }
 
 func TestInitWorkflowWritesOnlyWhenRequestedAndPreflightsOverwrites(t *testing.T) {
 	dir := t.TempDir()
 	chdir(t, dir)
-	writeSourceTreeWorkflowFixture(t, dir)
 	if err := os.MkdirAll(filepath.Join(".github", "workflows"), 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -812,19 +840,12 @@ func TestInitWorkflowWritesOnlyWhenRequestedAndPreflightsOverwrites(t *testing.T
 	if !strings.Contains(readCLIFile(t, workflowPath), "require-blocks: \"true\"") {
 		t.Fatalf("workflow missing explicit require-blocks:\n%s", readCLIFile(t, workflowPath))
 	}
-	if !strings.Contains(stderr.String(), "generated workflow is source-tree-only") {
+	if stderr.String() != "" {
 		t.Fatalf("stderr = %q", stderr.String())
 	}
 	if !strings.Contains(stdout.String(), "wrote setupproof.yml") || !strings.Contains(stdout.String(), "wrote .github/workflows/setupproof.yml") {
 		t.Fatalf("stdout = %q", stdout.String())
 	}
-}
-
-func writeSourceTreeWorkflowFixture(t *testing.T, root string) {
-	t.Helper()
-	writeCLIFile(t, root, "action.yml", "name: SetupProof\n")
-	writeCLIFile(t, root, filepath.Join("cmd", "setupproof", "main.go"), "package main\n")
-	writeCLIFile(t, root, filepath.Join("scripts", "github-action.sh"), "#!/usr/bin/env bash\n")
 }
 
 func chdir(t *testing.T, dir string) {

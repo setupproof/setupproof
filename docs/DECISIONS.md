@@ -32,9 +32,11 @@ CI context, while normal CLI runs default to `local`.
 ## GitHub Actions Checkout
 
 The released Action uses normal workflow checkout and downloads the pinned CLI
-archive declared by `cli-version`. The source-tree workflow remains available
-for this repository and vendored copies. ADR 0009 records the earlier bootstrap
-tradeoff and the source-tree workflow shape.
+archive declared by `cli-version`. `setupproof init --workflow` writes this
+released Action workflow for normal repositories. The source-tree workflow
+remains in this repository for dogfooding and vendored copies can adapt it
+manually. ADR 0009 records the earlier bootstrap tradeoff and the source-tree
+workflow shape.
 
 ## Shell Execution
 

@@ -45,10 +45,11 @@ checkout. Use `make release-archives VERSION=0.1.1` to build the release
 archive set locally.
 
 For a new project, `setupproof init` writes only `setupproof.yml` by default.
-Use `setupproof init --workflow` only from this source tree, or from a
-repository root that vendors the SetupProof Action files, when you want the
-source-tree workflow written too. Both writes refuse to overwrite existing
-files unless `--force` is passed.
+Use `setupproof init --workflow` to write the config and
+`.github/workflows/setupproof.yml` together for a normal GitHub repository. The
+generated workflow uses `actions/checkout@v4`, pins the SetupProof Action tag
+and `cli-version` to the current release, and passes no repository secrets.
+Both writes refuse to overwrite existing files unless `--force` is passed.
 
 `setupproof.yml` intentionally supports a small YAML subset in v0.1: two-space
 indentation, no tabs, string/number/boolean scalars, lists, and `x-` extension
