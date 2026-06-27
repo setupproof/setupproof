@@ -53,8 +53,8 @@ Both writes refuse to overwrite existing files unless `--force` is passed.
 
 `setupproof.yml` intentionally supports a small YAML subset in v0.1: two-space
 indentation, no tabs, string/number/boolean scalars, lists, and `x-` extension
-keys. The parser rejects unsupported YAML forms with precise errors instead of
-silently guessing.
+keys. Duplicate keys and unsupported YAML forms are rejected with precise
+errors instead of silently guessing.
 
 ## GitHub Actions
 
