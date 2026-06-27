@@ -67,11 +67,16 @@ func Parse(contents []byte) (*Config, error) {
 }
 
 type yamlParser struct {
-	cfg        Config
-	section    string
-	subsection string
-	block      *Block
-	pass       *EnvPass
+	cfg          Config
+	section      string
+	subsection   string
+	block        *Block
+	pass         *EnvPass
+	topLevelKeys map[string]bool
+	defaultKeys  map[string]bool
+	envKeys      map[string]bool
+	blockKeys    map[string]bool
+	passKeys     map[string]bool
 }
 
 func (p *yamlParser) parse(contents string) (*Config, error) {
@@ -153,6 +158,9 @@ func (p *yamlParser) parseTopLevel(lineNo int, text string) error {
 
 	switch key {
 	case "version":
+		if err := claimConfigKey(&p.topLevelKeys, lineNo, "top-level", key); err != nil {
+			return err
+		}
 		if value == "" {
 			return fmt.Errorf("line %d: version requires a value", lineNo)
 		}
@@ -162,12 +170,18 @@ func (p *yamlParser) parseTopLevel(lineNo int, text string) error {
 		}
 		p.cfg.Version = version
 	case "defaults", "files", "env", "blocks":
+		if err := claimConfigKey(&p.topLevelKeys, lineNo, "top-level", key); err != nil {
+			return err
+		}
 		if value != "" {
 			return fmt.Errorf("line %d: %s must be a section", lineNo, key)
 		}
 		p.section = key
 	default:
 		if strings.HasPrefix(key, "x-") {
+			if err := claimConfigKey(&p.topLevelKeys, lineNo, "top-level", key); err != nil {
+				return err
+			}
 			p.section = "x"
 			return nil
 		}
@@ -183,6 +197,9 @@ func (p *yamlParser) parseDefaults(lineNo int, text string) error {
 	key, value, ok := keyValue(text)
 	if !ok || value == "" {
 		return fmt.Errorf("line %d: defaults field requires key: value", lineNo)
+	}
+	if err := claimConfigKey(&p.defaultKeys, lineNo, "defaults", key); err != nil {
+		return err
 	}
 	switch key {
 	case "runner":
@@ -229,8 +246,12 @@ func (p *yamlParser) parseEnv(lineNo int, indent int, text string) error {
 		}
 		switch key {
 		case "allow", "pass":
+			if err := claimConfigKey(&p.envKeys, lineNo, "env", key); err != nil {
+				return err
+			}
 			p.subsection = key
 			p.pass = nil
+			p.passKeys = nil
 			return nil
 		default:
 			return fmt.Errorf("line %d: unknown env field %q", lineNo, key)
@@ -257,8 +278,9 @@ func (p *yamlParser) parseEnv(lineNo int, indent int, text string) error {
 				return fmt.Errorf("line %d: env.pass entries must be list items", lineNo)
 			}
 			pass := EnvPass{}
+			p.passKeys = nil
 			if value != "" {
-				if err := assignEnvPass(&pass, lineNo, value); err != nil {
+				if err := assignEnvPass(&pass, lineNo, value, &p.passKeys); err != nil {
 					return err
 				}
 			}
@@ -269,7 +291,7 @@ func (p *yamlParser) parseEnv(lineNo int, indent int, text string) error {
 		if indent != 6 || p.pass == nil {
 			return fmt.Errorf("line %d: env.pass fields must use six-space indentation", lineNo)
 		}
-		return assignEnvPass(p.pass, lineNo, text)
+		return assignEnvPass(p.pass, lineNo, text, &p.passKeys)
 	}
 	return nil
 }
@@ -284,8 +306,9 @@ func (p *yamlParser) parseBlocks(lineNo int, indent int, text string) error {
 			return fmt.Errorf("line %d: blocks entries must be list items", lineNo)
 		}
 		block := Block{}
+		p.blockKeys = nil
 		if value != "" {
-			if err := assignBlock(&block, lineNo, value); err != nil {
+			if err := assignBlock(&block, lineNo, value, &p.blockKeys); err != nil {
 				return err
 			}
 		}
@@ -297,13 +320,16 @@ func (p *yamlParser) parseBlocks(lineNo int, indent int, text string) error {
 	if indent != 4 || p.block == nil {
 		return fmt.Errorf("line %d: block fields must use four-space indentation", lineNo)
 	}
-	return assignBlock(p.block, lineNo, text)
+	return assignBlock(p.block, lineNo, text, &p.blockKeys)
 }
 
-func assignEnvPass(pass *EnvPass, lineNo int, text string) error {
+func assignEnvPass(pass *EnvPass, lineNo int, text string, seen *map[string]bool) error {
 	key, value, ok := keyValue(text)
 	if !ok || value == "" {
 		return fmt.Errorf("line %d: env.pass field requires key: value", lineNo)
+	}
+	if err := claimConfigKey(seen, lineNo, "env.pass", key); err != nil {
+		return err
 	}
 	switch key {
 	case "name":
@@ -326,10 +352,13 @@ func assignEnvPass(pass *EnvPass, lineNo int, text string) error {
 	return nil
 }
 
-func assignBlock(block *Block, lineNo int, text string) error {
+func assignBlock(block *Block, lineNo int, text string, seen *map[string]bool) error {
 	key, value, ok := keyValue(text)
 	if !ok || value == "" {
 		return fmt.Errorf("line %d: block field requires key: value", lineNo)
+	}
+	if err := claimConfigKey(seen, lineNo, "block", key); err != nil {
+		return err
 	}
 	switch key {
 	case "file":
@@ -363,6 +392,17 @@ func assignBlock(block *Block, lineNo int, text string) error {
 	default:
 		return fmt.Errorf("line %d: unknown block field %q", lineNo, key)
 	}
+	return nil
+}
+
+func claimConfigKey(seen *map[string]bool, lineNo int, scope string, key string) error {
+	if *seen == nil {
+		*seen = make(map[string]bool)
+	}
+	if (*seen)[key] {
+		return fmt.Errorf("line %d: duplicate %s field %q", lineNo, scope, key)
+	}
+	(*seen)[key] = true
 	return nil
 }
 

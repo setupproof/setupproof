@@ -98,6 +98,52 @@ func TestParseRejectsInvalidBoolean(t *testing.T) {
 	}
 }
 
+func TestParseRejectsDuplicateKeys(t *testing.T) {
+	tests := []struct {
+		name string
+		doc  string
+		want string
+	}{
+		{
+			name: "top-level",
+			doc:  "version: 1\nversion: 1\n",
+			want: `duplicate top-level field "version"`,
+		},
+		{
+			name: "defaults",
+			doc:  "version: 1\ndefaults:\n  runner: local\n  runner: docker\n",
+			want: `duplicate defaults field "runner"`,
+		},
+		{
+			name: "env",
+			doc:  "version: 1\nenv:\n  allow:\n    - NODE_ENV\n  allow:\n    - CI\n",
+			want: `duplicate env field "allow"`,
+		},
+		{
+			name: "env-pass",
+			doc:  "version: 1\nenv:\n  pass:\n    - name: TOKEN\n      name: OTHER_TOKEN\n",
+			want: `duplicate env.pass field "name"`,
+		},
+		{
+			name: "block",
+			doc:  "version: 1\nblocks:\n  - file: README.md\n    file: docs/setup.md\n    id: quickstart\n",
+			want: `duplicate block field "file"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Parse([]byte(tt.doc))
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("error = %v, want %q", err, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseRejectsDefaultsListWithSpecificError(t *testing.T) {
 	_, err := Parse([]byte("version: 1\ndefaults:\n  - runner: local\n"))
 	if err == nil {

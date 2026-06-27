@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "SetupProof Config",
-  "description": "Schema for setupproof.yml. The v0.1 parser supports a small YAML subset: two-space indentation, no tabs, string/number/boolean scalars, lists, and x- extension keys.",
+  "description": "Schema for setupproof.yml. The v0.1 parser supports a small YAML subset: two-space indentation, no tabs, string/number/boolean scalars, lists, no duplicate keys, and x- extension keys.",
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
