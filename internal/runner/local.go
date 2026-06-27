@@ -31,6 +31,7 @@ type Options struct {
 	KeepWorkspace bool
 	NoColor       bool
 	NoGlyphs      bool
+	Progress      bool
 }
 
 type fileState struct {
@@ -128,6 +129,7 @@ func runPreparedLocal(req planning.Request, plan planning.Plan, opts Options, st
 	if !ok {
 		return executionRun{code: code, warnings: warnings, runnerError: runnerError}
 	}
+	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
 
 	ctx, stop, signalReason := interruptContext()
 	defer stop()
@@ -140,7 +142,7 @@ func runPreparedLocal(req planning.Request, plan planning.Plan, opts Options, st
 		if len(blocks) == 0 {
 			continue
 		}
-		fileCode, fileReports, fileRunnerError := runFile(ctx, file, blocks, plan.Env, source, opts, stderr, signalReason)
+		fileCode, fileReports, fileRunnerError := runFile(ctx, file, blocks, plan.Env, source, opts, stderr, progress, signalReason)
 		blockReports = append(blockReports, fileReports...)
 		if fileCode == 2 || fileCode == 3 {
 			return executionRun{code: fileCode, blocks: blockReports, warnings: warnings, runnerError: fileRunnerError}
@@ -208,7 +210,7 @@ func groupBlocksByFile(blocks []planning.Block) map[string][]planning.Block {
 	return grouped
 }
 
-func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
+func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
 	sharedWorkspace, err := createWorkspace(source)
 	if err != nil {
 		fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", file, err)
@@ -261,7 +263,9 @@ func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan 
 			activeState = fileState{cwd: activeWorkspace.repoRoot, env: isolatedEnv}
 		}
 
-		outcome, nextState, output, durationMs := runBlock(ctx, block, activeWorkspace, activeState, stderr, blockSecrets)
+		span := progress.Start(block)
+		outcome, nextState, output, durationMs := runBlock(ctx, block, activeWorkspace, activeState, progress.OutputWriter(), blockSecrets)
+		span.Finish(outcome.result, durationMs)
 		blockReports = append(blockReports, reportBlock(block, outcome, output, durationMs))
 		if block.Options.Isolated {
 			if err := activeWorkspace.cleanup(opts.KeepWorkspace); err != nil {

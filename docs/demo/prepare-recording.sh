@@ -5,6 +5,10 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/../.." && pwd)
 
 export PS1='$ '
+unset NO_COLOR
+if [ "${TERM:-dumb}" = "dumb" ]; then
+  export TERM=xterm-256color
+fi
 
 TMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/setupproof-recording.XXXXXX")
 BIN="$TMP_ROOT/setupproof"
@@ -27,6 +31,7 @@ This is the quickstart people copy:
 
 <!-- setupproof id=quickstart -->
 ```sh
+sleep 1
 printf 'install dependencies\n'
 printf 'run tests\n'
 test -f README.md

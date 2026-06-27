@@ -65,8 +65,8 @@
     </g>
 
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
-      <text x="46" y="358" fill="#86efac" font-weight="700">+ SetupProof passed</text>
-      <text x="72" y="386" fill="#cbd5e1">1 block, 1 file, 42ms</text>
+      <text x="46" y="354" fill="#cbd5e1">==&gt; README.md#quickstart</text>
+      <text x="46" y="382" fill="#86efac" font-weight="700">+ README.md#quickstart passed</text>
     </g>
   </g>
 

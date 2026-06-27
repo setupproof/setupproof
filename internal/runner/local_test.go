@@ -35,6 +35,57 @@ func TestLocalRunnerCopiesTrackedWorkingTreeState(t *testing.T) {
 	}
 }
 
+func TestLocalRunnerProgressReportsSilentBlock(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\ntrue\n```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, stdout, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{Progress: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstdout:\n%s\nstderr:\n%s", code, stdout, stderr)
+	}
+	if !strings.Contains(stderr, "README.md#quickstart passed in") {
+		t.Fatalf("progress output missing completion:\n%s", stderr)
+	}
+	if !strings.Contains(stdout, "SetupProof passed") || strings.Contains(stdout, "\x1b[2K") {
+		t.Fatalf("stdout should contain only terminal report:\n%s", stdout)
+	}
+}
+
+func TestLocalRunnerProgressSuspendsForCommandOutput(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\nprintf 'install dependencies\\n'\n```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, _, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{Progress: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
+	}
+	for _, want := range []string{
+		"==> README.md#quickstart",
+		"install dependencies",
+		"README.md#quickstart passed in",
+	} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("progress output missing %q:\n%s", want, stderr)
+		}
+	}
+}
+
+func TestLocalRunnerProgressDisabledForPlainOptions(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\ntrue\n```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, _, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{Progress: true, NoColor: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
+	}
+	if strings.Contains(stderr, "passed in") || strings.Contains(stderr, "\x1b[2K") {
+		t.Fatalf("plain options should disable progress:\n%s", stderr)
+	}
+}
+
 func TestLocalRunnerRewritesAbsoluteSymlinkTargetsIntoWorkspace(t *testing.T) {
 	dir := gitRepo(t)
 	writeFile(t, dir, "README.md", "```sh setupproof id=symlink\n"+

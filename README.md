@@ -101,6 +101,8 @@ Typical local output is compact and scan-friendly:
   timeout=120s result=passed
 ```
 
+Interactive terminals show a live progress line while each block runs.
+
 For deterministic CI logs, keep the plain format:
 
 ```sh
