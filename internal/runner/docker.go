@@ -58,11 +58,14 @@ func runPreparedDocker(req planning.Request, plan planning.Plan, opts Options, s
 		fmt.Fprintln(stderr, err)
 		return executionRun{code: 2}
 	}
-	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, stderr)
+	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
+	sourceSpan := progress.StartPhase("Preparing repository copy")
+	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, progress.OutputWriter())
 	if !ok {
+		sourceSpan.Finish("error", 0)
 		return executionRun{code: code, warnings: warnings, runnerError: runnerError}
 	}
-	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
+	sourceSpan.Finish("ready", 0)
 
 	ctx, stop, signalReason := interruptContext()
 	defer stop()
@@ -111,26 +114,36 @@ func validateDockerPlan(plan planning.Plan) error {
 }
 
 func runDockerFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, imageRecorder *dockerImageRecorder, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
+	workspaceSpan := progress.StartPhase("Preparing Docker workspace for " + file)
+	workspaceStderr := progress.OutputWriter()
 	sharedWorkspace, err := createDockerWorkspace(source)
 	if err != nil {
-		fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", file, err)
+		fmt.Fprintf(workspaceStderr, "%s: workspace setup failed: %v\n", file, err)
+		workspaceSpan.Finish("error", 0)
 		return 3, blockReports, "workspace_setup_failed"
 	}
 	if opts.KeepWorkspace {
-		fmt.Fprint(stderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
+		fmt.Fprint(workspaceStderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
 	}
 	defer func() {
+		cleanupSpan := progress.StartPhase("Cleaning up Docker workspace for " + file)
+		cleanupStderr := progress.OutputWriter()
 		if err := sharedWorkspace.cleanup(opts.KeepWorkspace); err != nil {
-			fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", file, err)
+			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
+			cleanupSpan.Finish("error", 0)
 			code, runnerError = codeWithCleanupFailure(code, runnerError)
+			return
 		}
+		cleanupSpan.Finish("done", 0)
 	}()
 
-	baseEnv, secretValues, err := baselineDockerEnv(envPlan, stderr)
+	baseEnv, secretValues, err := baselineDockerEnv(envPlan, workspaceStderr)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		fmt.Fprintln(workspaceStderr, err)
+		workspaceSpan.Finish("error", 0)
 		return 2, blockReports, ""
 	}
+	workspaceSpan.Finish("ready", 0)
 	state := fileState{cwd: containerWorkspaceRoot, env: baseEnv}
 	exitCode := 0
 	stopped := false
@@ -140,11 +153,15 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		if container == nil {
 			return 0, ""
 		}
-		if err := removeDockerContainer(context.Background(), container.name, stderr); err != nil {
-			fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", file, err)
+		cleanupSpan := progress.StartPhase("Stopping Docker container for " + file)
+		cleanupStderr := progress.OutputWriter()
+		if err := removeDockerContainer(context.Background(), container.name, cleanupStderr); err != nil {
+			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
+			cleanupSpan.Finish("error", 0)
 			container = nil
 			return 3, "cleanup_failed"
 		}
+		cleanupSpan.Finish("done", 0)
 		container = nil
 		return 0, ""
 	}
@@ -187,6 +204,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		isolated := block.Options.Isolated
 
 		if isolated {
+			span.Phase("Preparing Docker workspace")
 			activeWorkspace, err = createDockerWorkspace(source)
 			if err != nil {
 				fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
@@ -212,6 +230,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 				return 3, blockReports, "workspace_setup_failed"
 			}
 			var startReason string
+			span.Phase("Starting Docker")
 			activeContainer, startReason, err = startDockerContainer(ctx, activeWorkspace, block.Options.DockerImage, activeState.env, block.Options.NetworkPolicy, blockStderr, blockSecrets)
 			if err != nil {
 				blockReports = append(blockReports, reportBlock(block, blockOutcome{result: "error", reason: startReason}, report.Output{}, 0))
@@ -222,6 +241,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 			}
 			imageRecorder.record(ctx, block.Options.DockerImage, blockStderr)
 		} else if activeContainer == nil {
+			span.Phase("Starting Docker")
 			if code, reason := startContainer(block, blockStderr); code != 0 {
 				blockReports = append(blockReports, reportBlock(block, blockOutcome{result: "error", reason: reason}, report.Output{}, 0))
 				span.Finish("error", 0)
@@ -230,25 +250,29 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 			activeContainer = container
 		}
 
+		span.Phase("Running")
 		outcome, nextState, containerAlive, output, durationMs := runDockerBlock(ctx, block, activeContainer, activeWorkspace, activeState, blockStderr, blockSecrets)
-		span.Finish(outcome.result, durationMs)
 		blockReports = append(blockReports, reportBlock(block, outcome, output, durationMs))
 
 		if isolated {
+			span.Phase("Cleaning up")
 			if activeContainer != nil && containerAlive {
-				if err := removeDockerContainer(context.Background(), activeContainer.name, stderr); err != nil {
-					fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
+				if err := removeDockerContainer(context.Background(), activeContainer.name, blockStderr); err != nil {
+					fmt.Fprintf(blockStderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
 					_ = activeWorkspace.cleanup(opts.KeepWorkspace)
+					span.Finish("error", durationMs)
 					return 3, blockReports, "cleanup_failed"
 				}
 			}
 			if err := activeWorkspace.cleanup(opts.KeepWorkspace); err != nil {
-				fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
+				fmt.Fprintf(blockStderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
+				span.Finish("error", durationMs)
 				return 3, blockReports, "cleanup_failed"
 			}
 		} else if !containerAlive {
 			container = nil
 		}
+		span.Finish(outcome.result, durationMs)
 
 		switch outcome.result {
 		case "passed":

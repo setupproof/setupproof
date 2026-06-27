@@ -52,6 +52,26 @@ func TestLocalRunnerProgressReportsSilentBlock(t *testing.T) {
 	}
 }
 
+func TestLocalRunnerProgressAnimatesLongQuietBlock(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\nsleep 1\n```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, _, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{Progress: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
+	}
+	for _, want := range []string{
+		"\x1b[2K",
+		"==> Running README.md#quickstart",
+		"README.md#quickstart passed in",
+	} {
+		if !strings.Contains(stderr, want) {
+			t.Fatalf("progress output missing %q:\n%s", want, stderr)
+		}
+	}
+}
+
 func TestLocalRunnerProgressSuspendsForCommandOutput(t *testing.T) {
 	dir := gitRepo(t)
 	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\nprintf 'install dependencies\\n'\n```\n")
@@ -62,7 +82,7 @@ func TestLocalRunnerProgressSuspendsForCommandOutput(t *testing.T) {
 		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
 	}
 	for _, want := range []string{
-		"==> README.md#quickstart",
+		"==> Running README.md#quickstart",
 		"install dependencies",
 		"README.md#quickstart passed in",
 	} {
