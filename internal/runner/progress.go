@@ -10,7 +10,17 @@ import (
 	"github.com/setupproof/setupproof/internal/planning"
 )
 
-var progressFrames = []string{"-", "\\", "|", "/"}
+const (
+	progressStartDelay = 160 * time.Millisecond
+	progressTick       = 120 * time.Millisecond
+)
+
+type progressSpanKind int
+
+const (
+	progressSpanBlock progressSpanKind = iota
+	progressSpanPhase
+)
 
 type terminalProgress struct {
 	enabled bool
@@ -25,12 +35,14 @@ type terminalProgress struct {
 
 type progressSpan struct {
 	progress               *terminalProgress
+	kind                   progressSpanKind
 	blockID                string
-	index                  int
-	total                  int
+	label                  string
+	phase                  string
 	started                time.Time
 	done                   chan struct{}
 	stopOnce               sync.Once
+	rendered               bool
 	outputSeen             bool
 	outputEndedWithNewline bool
 }
@@ -49,19 +61,41 @@ func newTerminalProgress(w io.Writer, opts Options, total int) *terminalProgress
 }
 
 func (p *terminalProgress) Start(block planning.Block) *progressSpan {
+	return p.StartBlock(block)
+}
+
+func (p *terminalProgress) StartBlock(block planning.Block) *progressSpan {
 	span := &progressSpan{progress: p}
 	if p == nil || !p.enabled {
 		return span
 	}
 	p.mu.Lock()
 	p.current++
+	span.kind = progressSpanBlock
 	span.blockID = block.QualifiedID
-	span.index = p.current
-	span.total = p.total
+	span.label = progressLabel(block.QualifiedID, p.current, p.total)
+	span.phase = "Running"
 	span.started = time.Now()
 	span.done = make(chan struct{})
 	p.active = span
-	p.renderLocked(span, 0)
+	p.mu.Unlock()
+
+	go span.animate()
+	return span
+}
+
+func (p *terminalProgress) StartPhase(label string) *progressSpan {
+	span := &progressSpan{progress: p}
+	if p == nil || !p.enabled {
+		return span
+	}
+	p.mu.Lock()
+	span.kind = progressSpanPhase
+	span.label = label
+	span.phase = label
+	span.started = time.Now()
+	span.done = make(chan struct{})
+	p.active = span
 	p.mu.Unlock()
 
 	go span.animate()
@@ -88,8 +122,10 @@ func (p *terminalProgress) writeOutput(data []byte) (int, error) {
 
 	if span := p.active; span != nil {
 		if !span.outputSeen {
-			p.clearLocked()
-			fmt.Fprintf(p.w, "==> %s\n", progressLabel(span))
+			if span.rendered {
+				p.clearLocked()
+			}
+			fmt.Fprintf(p.w, "==> %s\n", span.outputLabel())
 			span.outputSeen = true
 			span.stop()
 		}
@@ -98,6 +134,22 @@ func (p *terminalProgress) writeOutput(data []byte) (int, error) {
 		}
 	}
 	return p.w.Write(data)
+}
+
+func (s *progressSpan) Phase(phase string) {
+	if s == nil || s.progress == nil || !s.progress.enabled || strings.TrimSpace(phase) == "" {
+		return
+	}
+	p := s.progress
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.active != s || s.outputSeen {
+		return
+	}
+	s.phase = phase
+	if s.rendered {
+		p.renderLocked(s)
+	}
 }
 
 func (s *progressSpan) Finish(result string, durationMs int64) {
@@ -118,26 +170,40 @@ func (s *progressSpan) Finish(result string, durationMs int64) {
 	if s.outputSeen && !s.outputEndedWithNewline {
 		fmt.Fprintln(p.w)
 	}
-	if !s.outputSeen {
+	if !s.outputSeen && s.rendered {
 		p.clearLocked()
 	}
-	fmt.Fprintf(p.w, "%s %s %s in %s\n", progressStatus(result, p.noColor), s.blockID, progressResultText(result), progressDuration(durationMs))
+	if s.kind == progressSpanBlock {
+		fmt.Fprintf(p.w, "%s %s %s in %s\n", progressStatus(result, p.noColor), s.blockID, progressResultText(result), progressDuration(durationMs))
+	}
 	p.active = nil
 }
 
 func (s *progressSpan) animate() {
-	ticker := time.NewTicker(120 * time.Millisecond)
+	delay := time.NewTimer(progressStartDelay)
+	defer delay.Stop()
+	select {
+	case <-s.done:
+		return
+	case <-delay.C:
+		s.progress.mu.Lock()
+		if s.progress.active == s && !s.outputSeen {
+			s.rendered = true
+			s.progress.renderLocked(s)
+		}
+		s.progress.mu.Unlock()
+	}
+
+	ticker := time.NewTicker(progressTick)
 	defer ticker.Stop()
-	frame := 0
 	for {
 		select {
 		case <-s.done:
 			return
 		case <-ticker.C:
-			frame = (frame + 1) % len(progressFrames)
 			s.progress.mu.Lock()
 			if s.progress.active == s && !s.outputSeen {
-				s.progress.renderLocked(s, frame)
+				s.progress.renderLocked(s)
 			}
 			s.progress.mu.Unlock()
 		}
@@ -153,19 +219,39 @@ func (s *progressSpan) stop() {
 	})
 }
 
-func (p *terminalProgress) renderLocked(s *progressSpan, frame int) {
-	fmt.Fprintf(p.w, "\r\x1b[2K%s Running %s %s", progressFrames[frame], progressLabel(s), progressDuration(time.Since(s.started).Milliseconds()))
+func (p *terminalProgress) renderLocked(s *progressSpan) {
+	fmt.Fprintf(p.w, "\r\x1b[2K==> %s %s", s.activityLabel(), progressDuration(time.Since(s.started).Milliseconds()))
 }
 
 func (p *terminalProgress) clearLocked() {
 	fmt.Fprint(p.w, "\r\x1b[2K")
 }
 
-func progressLabel(s *progressSpan) string {
-	if s.total <= 1 {
+func (s *progressSpan) activityLabel() string {
+	if s.kind == progressSpanPhase {
+		return s.label
+	}
+	if s.phase == "" {
+		return s.label
+	}
+	return s.phase + " " + s.label
+}
+
+func (s *progressSpan) outputLabel() string {
+	if s.kind == progressSpanPhase {
+		return s.label
+	}
+	if s.phase == "" {
 		return s.blockID
 	}
-	return fmt.Sprintf("%s (%d/%d)", s.blockID, s.index, s.total)
+	return s.phase + " " + s.blockID
+}
+
+func progressLabel(blockID string, index int, total int) string {
+	if total <= 1 {
+		return blockID
+	}
+	return fmt.Sprintf("%s (%d/%d)", blockID, index, total)
 }
 
 func progressStatus(result string, noColor bool) string {

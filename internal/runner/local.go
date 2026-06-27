@@ -125,11 +125,14 @@ func buildExecutionPlan(req planning.Request, stderr io.Writer) (planning.Result
 }
 
 func runPreparedLocal(req planning.Request, plan planning.Plan, opts Options, stderr io.Writer) executionRun {
-	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, stderr)
+	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
+	sourceSpan := progress.StartPhase("Preparing repository copy")
+	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, progress.OutputWriter())
 	if !ok {
+		sourceSpan.Finish("error", 0)
 		return executionRun{code: code, warnings: warnings, runnerError: runnerError}
 	}
-	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
+	sourceSpan.Finish("ready", 0)
 
 	ctx, stop, signalReason := interruptContext()
 	defer stop()
@@ -211,26 +214,37 @@ func groupBlocksByFile(blocks []planning.Block) map[string][]planning.Block {
 }
 
 func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
+	workspaceSpan := progress.StartPhase("Preparing workspace for " + file)
+	workspaceStderr := progress.OutputWriter()
 	sharedWorkspace, err := createWorkspace(source)
 	if err != nil {
-		fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", file, err)
+		fmt.Fprintf(workspaceStderr, "%s: workspace setup failed: %v\n", file, err)
+		workspaceSpan.Finish("error", 0)
 		return 3, blockReports, "workspace_setup_failed"
 	}
 	if opts.KeepWorkspace {
-		fmt.Fprint(stderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
+		fmt.Fprint(workspaceStderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
 	}
 	defer func() {
+		cleanupSpan := progress.StartPhase("Cleaning up workspace for " + file)
+		cleanupStderr := progress.OutputWriter()
 		if err := sharedWorkspace.cleanup(opts.KeepWorkspace); err != nil {
-			fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", file, err)
+			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
+			cleanupSpan.Finish("error", 0)
 			code, runnerError = codeWithCleanupFailure(code, runnerError)
+			return
 		}
+		cleanupSpan.Finish("done", 0)
 	}()
 
-	baseEnv, secretValues, err := baselineEnv(envPlan, sharedWorkspace, stderr)
+	baseEnv, secretValues, err := baselineEnv(envPlan, sharedWorkspace, workspaceStderr)
 	if err != nil {
-		fmt.Fprintln(stderr, err)
+		fmt.Fprintln(workspaceStderr, err)
+		workspaceSpan.Finish("error", 0)
 		return 2, blockReports, ""
 	}
+	workspaceSpan.Finish("ready", 0)
+
 	state := fileState{cwd: sharedWorkspace.repoRoot, env: baseEnv}
 	exitCode := 0
 	stopped := false
@@ -241,38 +255,45 @@ func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan 
 			continue
 		}
 
+		span := progress.StartBlock(block)
+		blockStderr := progress.OutputWriter()
 		activeWorkspace := sharedWorkspace
 		activeState := state
 		blockSecrets := secretValues
 		if block.Options.Isolated {
+			span.Phase("Preparing workspace")
 			activeWorkspace, err = createWorkspace(source)
 			if err != nil {
-				fmt.Fprintf(stderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
+				span.Finish("error", 0)
 				return 3, blockReports, "workspace_setup_failed"
 			}
 			if opts.KeepWorkspace {
-				fmt.Fprint(stderr, keepWorkspaceWarning(block.QualifiedID, activeWorkspace.repoRoot))
+				fmt.Fprint(blockStderr, keepWorkspaceWarning(block.QualifiedID, activeWorkspace.repoRoot))
 			}
-			isolatedEnv, isolatedSecrets, err := baselineEnv(envPlan, activeWorkspace, stderr)
+			isolatedEnv, isolatedSecrets, err := baselineEnv(envPlan, activeWorkspace, blockStderr)
 			if err != nil {
 				_ = activeWorkspace.cleanup(opts.KeepWorkspace)
-				fmt.Fprintln(stderr, err)
+				fmt.Fprintln(blockStderr, err)
+				span.Finish("error", 0)
 				return 2, blockReports, ""
 			}
 			blockSecrets = append(append([]string(nil), secretValues...), isolatedSecrets...)
 			activeState = fileState{cwd: activeWorkspace.repoRoot, env: isolatedEnv}
 		}
 
-		span := progress.Start(block)
-		outcome, nextState, output, durationMs := runBlock(ctx, block, activeWorkspace, activeState, progress.OutputWriter(), blockSecrets)
-		span.Finish(outcome.result, durationMs)
+		span.Phase("Running")
+		outcome, nextState, output, durationMs := runBlock(ctx, block, activeWorkspace, activeState, blockStderr, blockSecrets)
 		blockReports = append(blockReports, reportBlock(block, outcome, output, durationMs))
 		if block.Options.Isolated {
+			span.Phase("Cleaning up")
 			if err := activeWorkspace.cleanup(opts.KeepWorkspace); err != nil {
-				fmt.Fprintf(stderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
+				fmt.Fprintf(blockStderr, "%s: cleanup failed: %v\n", block.QualifiedID, err)
+				span.Finish("error", durationMs)
 				return 3, blockReports, "cleanup_failed"
 			}
 		}
+		span.Finish(outcome.result, durationMs)
 
 		switch outcome.result {
 		case "passed":

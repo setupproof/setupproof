@@ -101,7 +101,7 @@ Typical local output is compact and scan-friendly:
   timeout=120s result=passed
 ```
 
-Interactive terminals show a live progress line while each block runs.
+Interactive terminals wait briefly, then show the current setup phase while a block is still running.
 
 For deterministic CI logs, keep the plain format:
 
