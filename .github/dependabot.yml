@@ -6,7 +6,7 @@ updates:
       interval: weekly
       day: monday
       time: "09:00"
-      timezone: America/New_York
+      timezone: Etc/UTC
     open-pull-requests-limit: 5
     labels:
       - enhancement
@@ -21,7 +21,7 @@ updates:
       interval: weekly
       day: monday
       time: "09:15"
-      timezone: America/New_York
+      timezone: Etc/UTC
     open-pull-requests-limit: 5
     labels:
       - enhancement
