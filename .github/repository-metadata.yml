@@ -1,4 +1,4 @@
-description: Test marked README quickstarts from a clean workspace before new contributors hit them.
+description: Run README setup commands from a clean checkout before contributors copy them.
 homepage: https://setupproof.github.io/setupproof/
 topics:
   - setup

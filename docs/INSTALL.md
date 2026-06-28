@@ -1,6 +1,7 @@
 # Install And CI
 
-SetupProof v0.1.2 ships as a Go module, GitHub release archives, and a
+Install the CLI when you want to verify marked README setup blocks locally or
+in CI. SetupProof v0.1.2 ships as a Go module, GitHub release archives, and a
 versioned composite GitHub Action. npm registry, Homebrew, winget, Chocolatey,
 and Scoop packages are not published yet.
 

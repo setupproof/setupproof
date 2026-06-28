@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Use non-executing commands first when a setup-doc check is confusing:
+Start with commands that describe the plan before running any setup block:
 
 ```sh
 setupproof review README.md
@@ -8,7 +8,7 @@ setupproof doctor README.md
 setupproof --dry-run --json --require-blocks README.md
 ```
 
-Then run the marked blocks once the plan matches the setup path you expect:
+Run the marked blocks once the plan matches the setup path you expect:
 
 ```sh
 setupproof --require-blocks --no-color --no-glyphs README.md
@@ -28,7 +28,18 @@ marker fails loudly instead of producing an empty run.
 
 ## Command Failed
 
-A line such as this is an ordinary setup command failure:
+Styled terminal output points at the README block first:
+
+```text
+! SetupProof failed  742ms
+  1 block, 1 file
+
+! README.md#quickstart failed  742ms
+  README.md:18 runner=local timeout=120s result=failed exit=1 reason=exit-code
+  next: setupproof review README.md
+```
+
+Plain CI logs use the same facts on one row:
 
 ```text
 [failed] README.md#quickstart file=README.md:18 runner=local timeout=120s result=failed exit=1 reason=exit-code

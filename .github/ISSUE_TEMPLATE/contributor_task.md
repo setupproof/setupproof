@@ -8,7 +8,7 @@ assignees: ""
 
 ## Task
 
-What should change?
+What focused change would make SetupProof clearer, safer, or easier to adopt?
 
 ## Area
 

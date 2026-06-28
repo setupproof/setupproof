@@ -1,9 +1,10 @@
 # Support
 
-SetupProof v0.1.0 can run from the Go module install path, release archives, a
+SetupProof v0.1.2 can run from the Go module install path, release archives, a
 source checkout, or the pinned GitHub Action.
 
-For help with a SetupProof run, include:
+For help with a run, include enough context to identify the marked block and
+the runner environment:
 
 - the command you ran;
 - `setupproof --version`;

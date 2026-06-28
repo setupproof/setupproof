@@ -1,7 +1,11 @@
 # Comparison
 
-SetupProof is for maintainers who want README setup commands to fail in CI
-before new contributors copy stale instructions.
+SetupProof does one job: prove that the setup commands people copy from the
+README still run from a clean checkout.
+
+It is not a Markdown linter, notebook runner, or replacement for the project's
+test suite. It sits at the documentation boundary where drift is easy to miss:
+the command in the README changed from trusted instructions into stale advice.
 
 ## SetupProof
 
