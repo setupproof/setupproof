@@ -210,12 +210,11 @@ func TestRenderTerminalOptionsControlStatusPrefix(t *testing.T) {
 	}
 	for _, want := range []string{
 		"SetupProof failed",
-		"1 block, 1 file, 42ms",
+		"1 block, 1 file",
 		"README.md#fail",
-		"file=README.md:1",
 		"runner=local",
-		"timeout=120s result=failed exit=1 reason=exit-code",
-		"next command: setupproof review README.md",
+		"README.md:1 runner=local timeout=120s result=failed exit=1 reason=exit-code",
+		"next: setupproof review README.md",
 	} {
 		if !strings.Contains(colored.String(), want) {
 			t.Fatalf("colored terminal output missing %q:\n%s", want, colored.String())
@@ -234,6 +233,73 @@ func TestRenderTerminalOptionsControlStatusPrefix(t *testing.T) {
 	}
 	if strings.Contains(plain.String(), "SetupProof failed") {
 		t.Fatalf("plain terminal output should keep compact row format: %q", plain.String())
+	}
+}
+
+func TestRenderTerminalNoopShowsNextStep(t *testing.T) {
+	r := Report{
+		Result: "noop",
+		Files:  []string{"README.md"},
+	}
+
+	var out bytes.Buffer
+	if err := RenderTerminal(&out, r, TerminalOptions{}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"No marked blocks found.",
+		"<!-- setupproof id=quickstart -->",
+		"setupproof suggest README.md",
+	} {
+		if !strings.Contains(out.String(), want) {
+			t.Fatalf("noop output missing %q:\n%s", want, out.String())
+		}
+	}
+
+	out.Reset()
+	if err := RenderTerminal(&out, r, TerminalOptions{NoColor: true, NoGlyphs: true}); err != nil {
+		t.Fatal(err)
+	}
+	if out.String() != "No marked blocks found.\n" {
+		t.Fatalf("plain noop output = %q", out.String())
+	}
+}
+
+func TestRenderTerminalFailureShowsTailAndGuidance(t *testing.T) {
+	r := Report{
+		Result:     "failed",
+		ExitCode:   1,
+		DurationMs: 842,
+		Files:      []string{"README.md"},
+		Blocks: []Block{{
+			ID:          "fail",
+			QualifiedID: "README.md#fail",
+			File:        "README.md",
+			Line:        18,
+			Runner:      "local",
+			Timeout:     "120s",
+			Result:      "failed",
+			ExitCode:    7,
+			Reason:      "exit-code",
+			DurationMs:  842,
+			StderrTail:  "first line\nfailure output\n",
+		}},
+	}
+
+	var out bytes.Buffer
+	if err := RenderTerminal(&out, r, TerminalOptions{NoColor: true}); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{
+		"! README.md#fail failed  842ms",
+		"README.md:18 runner=local timeout=120s result=failed exit=7 reason=exit-code",
+		"stderr tail:",
+		"failure output",
+		"next: setupproof review README.md",
+	} {
+		if !strings.Contains(out.String(), want) {
+			t.Fatalf("failure output missing %q:\n%s", want, out.String())
+		}
 	}
 }
 
@@ -275,14 +341,15 @@ func TestRenderTerminalDefaultOutputSeparatesBlocks(t *testing.T) {
 	rendered := out.String()
 	for _, want := range []string{
 		"+ SetupProof passed",
-		"2 blocks, 2 files, 1.2s",
+		"2 blocks, 2 files",
 		"+ README.md#quickstart",
-		"file=README.md:12",
+		"README.md:12",
 		"runner=local",
 		"timeout=120s result=passed",
 		"+ docs/INSTALL.md#install",
-		"file=docs/INSTALL.md:34",
-		"runner=docker image=alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+		"docs/INSTALL.md:34",
+		"runner=docker",
+		"image: alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 		"timeout=60s result=passed",
 	} {
 		if !strings.Contains(rendered, want) {
