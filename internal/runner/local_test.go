@@ -15,6 +15,12 @@ import (
 	"github.com/setupproof/setupproof/internal/shellquote"
 )
 
+var runnerANSIPattern = regexp.MustCompile(`\x1b\[[0-9;?]*[ -/]*[@-~]`)
+
+func stripRunnerANSI(value string) string {
+	return runnerANSIPattern.ReplaceAllString(value, "")
+}
+
 func TestLocalRunnerCopiesTrackedWorkingTreeState(t *testing.T) {
 	dir := gitRepo(t)
 	writeFile(t, dir, "README.md", "```sh setupproof id=copy\n"+
@@ -44,8 +50,12 @@ func TestLocalRunnerProgressReportsSilentBlock(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit code = %d\nstdout:\n%s\nstderr:\n%s", code, stdout, stderr)
 	}
-	if !strings.Contains(stderr, "README.md#quickstart passed in") {
+	plain := stripRunnerANSI(stderr)
+	if !strings.Contains(plain, "README.md#quickstart passed") {
 		t.Fatalf("progress output missing completion:\n%s", stderr)
+	}
+	if strings.Contains(plain, "passed in") {
+		t.Fatalf("progress completion should use compact timing:\n%s", stderr)
 	}
 	if !strings.Contains(stdout, "SetupProof passed") || strings.Contains(stdout, "\x1b[2K") {
 		t.Fatalf("stdout should contain only terminal report:\n%s", stdout)
@@ -61,13 +71,49 @@ func TestLocalRunnerProgressAnimatesLongQuietBlock(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
 	}
+	plain := stripRunnerANSI(stderr)
 	for _, want := range []string{
 		"\x1b[2K",
-		"==> Running README.md#quickstart",
-		"README.md#quickstart passed in",
+		"\x1b[36m==>\x1b[0m",
+		"\x1b[1mRunning",
+		"\x1b[2m",
 	} {
 		if !strings.Contains(stderr, want) {
 			t.Fatalf("progress output missing %q:\n%s", want, stderr)
+		}
+	}
+	for _, want := range []string{
+		"==>",
+		"Running",
+		"README.md#quickstart",
+		"README.md#quickstart passed",
+	} {
+		if !strings.Contains(plain, want) {
+			t.Fatalf("plain progress output missing %q:\n%s", want, plain)
+		}
+	}
+	if strings.Contains(plain, "passed in") {
+		t.Fatalf("progress completion should use compact timing:\n%s", stderr)
+	}
+}
+
+func TestLocalRunnerProgressShowsMultiBlockCount(t *testing.T) {
+	dir := gitRepo(t)
+	writeFile(t, dir, "README.md", "```sh setupproof id=one\nsleep 1\n```\n\n```sh setupproof id=two\ntrue\n```\n")
+	gitAdd(t, dir, "README.md")
+
+	code, _, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{"README.md"}}, Options{Progress: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
+	}
+	plain := stripRunnerANSI(stderr)
+	for _, want := range []string{
+		"README.md#one",
+		"1/2",
+		"README.md#two passed",
+	} {
+		if !strings.Contains(plain, want) {
+			t.Fatalf("progress output missing %q:\n%s", want, plain)
 		}
 	}
 }
@@ -81,14 +127,19 @@ func TestLocalRunnerProgressSuspendsForCommandOutput(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
 	}
+	plain := stripRunnerANSI(stderr)
 	for _, want := range []string{
-		"==> Running README.md#quickstart",
+		"==> Running",
+		"README.md#quickstart",
 		"install dependencies",
-		"README.md#quickstart passed in",
+		"README.md#quickstart passed",
 	} {
-		if !strings.Contains(stderr, want) {
-			t.Fatalf("progress output missing %q:\n%s", want, stderr)
+		if !strings.Contains(plain, want) {
+			t.Fatalf("progress output missing %q:\n%s", want, plain)
 		}
+	}
+	if strings.Contains(plain, "passed in") {
+		t.Fatalf("progress completion should use compact timing:\n%s", stderr)
 	}
 }
 
@@ -101,7 +152,7 @@ func TestLocalRunnerProgressDisabledForPlainOptions(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
 	}
-	if strings.Contains(stderr, "passed in") || strings.Contains(stderr, "\x1b[2K") {
+	if strings.Contains(stderr, "README.md#quickstart passed") || strings.Contains(stderr, "\x1b[2K") {
 		t.Fatalf("plain options should disable progress:\n%s", stderr)
 	}
 }

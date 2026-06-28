@@ -31,8 +31,9 @@ This is the quickstart people copy:
 
 <!-- setupproof id=quickstart -->
 ```sh
-sleep 1
+sleep 1.4
 printf 'install dependencies\n'
+sleep 0.2
 printf 'run tests\n'
 test -f README.md
 ```

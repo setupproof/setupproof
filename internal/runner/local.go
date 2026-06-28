@@ -126,7 +126,7 @@ func buildExecutionPlan(req planning.Request, stderr io.Writer) (planning.Result
 
 func runPreparedLocal(req planning.Request, plan planning.Plan, opts Options, stderr io.Writer) executionRun {
 	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
-	sourceSpan := progress.StartPhase("Preparing repository copy")
+	sourceSpan := progress.StartPhase("Preparing repo")
 	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, progress.OutputWriter())
 	if !ok {
 		sourceSpan.Finish("error", 0)
@@ -214,7 +214,7 @@ func groupBlocksByFile(blocks []planning.Block) map[string][]planning.Block {
 }
 
 func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
-	workspaceSpan := progress.StartPhase("Preparing workspace for " + file)
+	workspaceSpan := progress.StartPhase("Preparing workspace")
 	workspaceStderr := progress.OutputWriter()
 	sharedWorkspace, err := createWorkspace(source)
 	if err != nil {
@@ -226,7 +226,7 @@ func runFile(ctx context.Context, file string, blocks []planning.Block, envPlan 
 		fmt.Fprint(workspaceStderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
 	}
 	defer func() {
-		cleanupSpan := progress.StartPhase("Cleaning up workspace for " + file)
+		cleanupSpan := progress.StartPhase("Cleaning up")
 		cleanupStderr := progress.OutputWriter()
 		if err := sharedWorkspace.cleanup(opts.KeepWorkspace); err != nil {
 			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
