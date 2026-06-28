@@ -1,5 +1,9 @@
 name: SetupProof
-description: Test marked README quickstarts from a clean workspace.
+description: Run README setup commands from a clean checkout before contributors copy them.
+
+branding:
+  icon: check-circle
+  color: green
 
 inputs:
   cli-version:
