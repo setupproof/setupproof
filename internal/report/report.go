@@ -146,38 +146,35 @@ func WriteJSON(w io.Writer, r Report) error {
 
 func RenderTerminal(w io.Writer, r Report, opts TerminalOptions) error {
 	if r.Result == "noop" {
-		_, err := fmt.Fprintln(w, "No marked blocks found.")
-		return err
+		return renderTerminalNoop(w, r, opts)
 	}
 	if opts.NoGlyphs {
 		return renderTerminalRows(w, r, opts)
 	}
 	if len(r.Blocks) == 0 && r.Result == "error" {
-		if _, err := fmt.Fprintf(w, "%sSetupProof %s\n", terminalStatusPrefix(r.Result, opts), r.Result); err != nil {
+		if _, err := fmt.Fprintf(w, "%sSetupProof %s  %s\n", terminalStatusPrefix(r.Result, opts), r.Result, terminalMuted(terminalDuration(r.DurationMs), opts)); err != nil {
 			return err
 		}
-		var details []string
 		if r.Runner.Kind != "" {
-			details = append(details, "runner="+r.Runner.Kind)
+			if _, err := fmt.Fprintf(w, "  runner: %s\n", r.Runner.Kind); err != nil {
+				return err
+			}
 		}
 		if r.Runner.Error != nil && r.Runner.Error.Reason != "" {
-			details = append(details, "reason="+r.Runner.Error.Reason)
-		}
-		if len(details) > 0 {
-			if _, err := fmt.Fprintf(w, "  %s\n", strings.Join(details, " ")); err != nil {
+			if _, err := fmt.Fprintf(w, "  reason: %s\n", r.Runner.Error.Reason); err != nil {
 				return err
 			}
 		}
 		if next := doctorCommand(r.Files); next != "" {
-			_, err := fmt.Fprintf(w, "  next command: %s\n", next)
+			_, err := fmt.Fprintf(w, "  next: %s\n", next)
 			return err
 		}
 		return nil
 	}
-	if _, err := fmt.Fprintf(w, "%sSetupProof %s\n", terminalStatusPrefix(r.Result, opts), r.Result); err != nil {
+	if _, err := fmt.Fprintf(w, "%sSetupProof %s  %s\n", terminalStatusPrefix(r.Result, opts), r.Result, terminalMuted(terminalDuration(r.DurationMs), opts)); err != nil {
 		return err
 	}
-	if _, err := fmt.Fprintf(w, "  %s, %s, %s\n\n", terminalCount(len(r.Blocks), "block"), terminalCount(len(r.Files), "file"), terminalDuration(r.DurationMs)); err != nil {
+	if _, err := fmt.Fprintf(w, "  %s, %s\n\n", terminalCount(len(r.Blocks), "block"), terminalCount(len(r.Files), "file")); err != nil {
 		return err
 	}
 	for index, block := range r.Blocks {
@@ -186,16 +183,26 @@ func RenderTerminal(w io.Writer, r Report, opts TerminalOptions) error {
 				return err
 			}
 		}
-		if _, err := fmt.Fprintf(w, "%s%s\n", terminalStatusPrefix(block.Result, opts), summaryBlockID(block)); err != nil {
+		if _, err := fmt.Fprintf(w, "%s%s %s  %s\n", terminalStatusPrefix(block.Result, opts), summaryBlockID(block), terminalResultText(block.Result), terminalMuted(terminalDuration(block.DurationMs), opts)); err != nil {
 			return err
 		}
-		for _, details := range terminalBlockDetailLines(block) {
+		for _, details := range terminalBlockDetailLines(block, opts) {
 			if _, err := fmt.Fprintf(w, "  %s\n", details); err != nil {
 				return err
 			}
 		}
 		if needsTerminalGuidance(block.Result) {
-			if _, err := fmt.Fprintf(w, "  next command: %s\n", reviewCommand(block.File)); err != nil {
+			for _, line := range terminalFailureDetailLines(block, opts) {
+				if _, err := fmt.Fprintf(w, "  %s\n", line); err != nil {
+					return err
+				}
+			}
+			if hint := terminalFailureHint(block); hint != "" {
+				if _, err := fmt.Fprintf(w, "  hint: %s\n", hint); err != nil {
+					return err
+				}
+			}
+			if _, err := fmt.Fprintf(w, "  next: %s\n", reviewCommand(block.File)); err != nil {
 				return err
 			}
 		}
@@ -254,44 +261,140 @@ func renderTerminalRows(w io.Writer, r Report, opts TerminalOptions) error {
 	return nil
 }
 
-func terminalBlockDetailLines(block Block) []string {
+func renderTerminalNoop(w io.Writer, r Report, opts TerminalOptions) error {
+	if opts.NoGlyphs {
+		_, err := fmt.Fprintln(w, "No marked blocks found.")
+		return err
+	}
+	if _, err := fmt.Fprintln(w, "No marked blocks found."); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, "Add one above a shell block:"); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, "  <!-- setupproof id=quickstart -->"); err != nil {
+		return err
+	}
+	if next := suggestCommand(r.Files); next != "" {
+		if _, err := fmt.Fprintln(w); err != nil {
+			return err
+		}
+		_, err := fmt.Fprintf(w, "Next command:\n  %s\n", next)
+		return err
+	}
+	return nil
+}
+
+func terminalBlockDetailLines(block Block, opts TerminalOptions) []string {
 	var lines []string
+	var placement []string
 	if location := summaryLocation(block); location != "" {
-		lines = append(lines, "file="+location)
+		placement = append(placement, location)
 	}
-	var runnerFields []string
 	if block.Runner != "" {
-		runnerFields = append(runnerFields, "runner="+block.Runner)
+		placement = append(placement, "runner="+block.Runner)
 	}
-	if block.DockerImage != "" {
-		runnerFields = append(runnerFields, "image="+block.DockerImage)
-	}
-	if len(runnerFields) > 0 {
-		lines = append(lines, strings.Join(runnerFields, " "))
-	}
-	var resultFields []string
 	if block.Timeout != "" {
-		resultFields = append(resultFields, "timeout="+block.Timeout)
+		placement = append(placement, "timeout="+block.Timeout)
 	}
 	if block.Result != "" {
-		resultFields = append(resultFields, "result="+block.Result)
+		placement = append(placement, "result="+block.Result)
 	}
 	if block.Result == "failed" || block.Result == "timeout" {
-		resultFields = append(resultFields, fmt.Sprintf("exit=%d", block.ExitCode))
+		placement = append(placement, fmt.Sprintf("exit=%d", block.ExitCode))
 	}
 	if block.Reason != "" {
-		resultFields = append(resultFields, "reason="+block.Reason)
+		placement = append(placement, "reason="+block.Reason)
 	}
 	if block.InteractiveCommand != "" {
-		resultFields = append(resultFields, "command="+block.InteractiveCommand)
+		placement = append(placement, "command="+block.InteractiveCommand)
 	}
 	if block.CleanupCompleted != nil {
-		resultFields = append(resultFields, fmt.Sprintf("cleanupCompleted=%t", *block.CleanupCompleted))
+		cleanup := "incomplete"
+		if *block.CleanupCompleted {
+			cleanup = "completed"
+		}
+		placement = append(placement, "cleanup="+cleanup)
 	}
-	if len(resultFields) > 0 {
-		lines = append(lines, strings.Join(resultFields, " "))
+	if len(placement) > 0 {
+		lines = append(lines, terminalMuted(strings.Join(placement, " "), opts))
+	}
+	if block.DockerImage != "" {
+		lines = append(lines, "image: "+block.DockerImage)
 	}
 	return lines
+}
+
+func terminalFailureDetailLines(block Block, opts TerminalOptions) []string {
+	tail, title := summaryBestTail(block)
+	lines := terminalTailLines(tail, 6, 120)
+	if len(lines) == 0 {
+		return nil
+	}
+	label := strings.ToLower(strings.TrimSuffix(title, " (truncated)"))
+	if label == "" {
+		label = "output"
+	}
+	var details []string
+	details = append(details, label+":")
+	for _, line := range lines {
+		details = append(details, terminalMuted("  "+line, opts))
+	}
+	return details
+}
+
+func terminalTailLines(value string, maxLines int, maxWidth int) []string {
+	value = strings.ReplaceAll(StripANSI(value), "\r", "")
+	var lines []string
+	for _, line := range strings.Split(value, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		lines = append(lines, terminalTruncateMiddle(line, maxWidth))
+	}
+	if maxLines > 0 && len(lines) > maxLines {
+		lines = lines[len(lines)-maxLines:]
+	}
+	return lines
+}
+
+func terminalTruncateMiddle(value string, maxWidth int) string {
+	if maxWidth <= 0 {
+		return value
+	}
+	runes := []rune(value)
+	if len(runes) <= maxWidth {
+		return value
+	}
+	if maxWidth <= 3 {
+		return string(runes[:maxWidth])
+	}
+	left := (maxWidth - 3) / 2
+	right := maxWidth - 3 - left
+	return string(runes[:left]) + "..." + string(runes[len(runes)-right:])
+}
+
+func terminalFailureHint(block Block) string {
+	switch block.Result {
+	case "timeout":
+		return "raise the timeout or split the setup block"
+	case "failed":
+		if block.InteractiveCommand != "" {
+			return "replace interactive input with non-interactive flags or fixtures"
+		}
+	case "error":
+		switch block.Reason {
+		case "shell_unavailable":
+			return "install the requested shell or change the block language"
+		case "image_pull_failed":
+			return "check the Docker image name, tag, and registry access"
+		}
+	}
+	return ""
 }
 
 func terminalCount(count int, singular string) string {
@@ -309,6 +412,16 @@ func terminalDuration(ms int64) string {
 	return (time.Duration(ms) * time.Millisecond).String()
 }
 
+func terminalResultText(result string) string {
+	if result == "timeout" {
+		return "timed out"
+	}
+	if strings.TrimSpace(result) == "" {
+		return "finished"
+	}
+	return result
+}
+
 func terminalStatusPrefix(result string, opts TerminalOptions) string {
 	var label string
 	if opts.NoGlyphs {
@@ -324,10 +437,15 @@ func terminalStatusPrefix(result string, opts TerminalOptions) string {
 		}
 	}
 	if !opts.NoColor {
-		label = terminalColor(result) + label + "\x1b[0m"
+		label = terminalColor(result) + label + terminalANSIReset
 	}
 	return label + " "
 }
+
+const (
+	terminalANSIReset = "\x1b[0m"
+	terminalANSIDim   = "\x1b[2m"
+)
 
 func terminalColor(result string) string {
 	switch result {
@@ -338,6 +456,13 @@ func terminalColor(result string) string {
 	default:
 		return "\x1b[31m"
 	}
+}
+
+func terminalMuted(value string, opts TerminalOptions) string {
+	if opts.NoColor || value == "" {
+		return value
+	}
+	return terminalANSIDim + value + terminalANSIReset
 }
 
 func needsTerminalGuidance(result string) bool {
@@ -354,6 +479,23 @@ func reviewCommand(file string) string {
 		return app.CommandName + " review <markdown-file>"
 	}
 	return app.CommandName + " review " + shellArg(file)
+}
+
+func suggestCommand(files []string) string {
+	if len(files) == 0 {
+		return app.CommandName + " suggest <markdown-file>"
+	}
+	var quoted []string
+	for _, file := range files {
+		if file == "" {
+			continue
+		}
+		quoted = append(quoted, shellArg(file))
+	}
+	if len(quoted) == 0 {
+		return app.CommandName + " suggest <markdown-file>"
+	}
+	return app.CommandName + " suggest " + strings.Join(quoted, " ")
 }
 
 func doctorCommand(files []string) string {

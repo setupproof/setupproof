@@ -16,6 +16,7 @@ const (
 	progressPhaseWidth = 15
 	progressCountWidth = 3
 	progressTimeWidth  = 7
+	progressLabelWidth = 48
 )
 
 const (
@@ -248,7 +249,7 @@ func (s *progressSpan) activityLabel(noColor bool, durationMs int64) string {
 	if phase == "" {
 		phase = "Running"
 	}
-	line := progressBold(progressPaddedRight(phase, progressPhaseWidth), noColor) + "  " + s.label
+	line := progressBold(progressPaddedRight(phase, progressPhaseWidth), noColor) + "  " + progressTruncateMiddle(s.label, progressLabelWidth)
 	if s.count != "" {
 		line += "  " + progressDim(progressPadded(s.count, progressCountWidth), noColor)
 	}
@@ -343,7 +344,26 @@ func progressPaddedRight(value string, width int) string {
 	return fmt.Sprintf("%-*s", width, value)
 }
 
+func progressTruncateMiddle(value string, maxWidth int) string {
+	if maxWidth <= 0 {
+		return value
+	}
+	runes := []rune(value)
+	if len(runes) <= maxWidth {
+		return value
+	}
+	if maxWidth <= 3 {
+		return string(runes[:maxWidth])
+	}
+	left := (maxWidth - 3) / 2
+	right := maxWidth - 3 - left
+	return string(runes[:left]) + "..." + string(runes[len(runes)-right:])
+}
+
 func progressResultText(result string) string {
+	if result == "timeout" {
+		return "timed out"
+	}
 	if strings.TrimSpace(result) == "" {
 		return "finished"
 	}

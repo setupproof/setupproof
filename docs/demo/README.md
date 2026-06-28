@@ -7,9 +7,10 @@ temporary project used by that recording.
 The GIF shows the maintainer path:
 
 1. inspect the marked README quickstart;
-2. review execution semantics without running commands;
-3. run the marked block in a copied workspace with the live progress line and
-   compact completion timing visible.
+2. review execution, workspace, environment, and report semantics without
+   running commands;
+3. run the marked block in a copied workspace with the live progress line,
+   compact completion timing, and final terminal report visible.
 
 Regenerate the GIF:
 

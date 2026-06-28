@@ -57,18 +57,19 @@
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
       <text x="46" y="98" fill="#e5e7eb">$ setupproof review README.md</text>
       <text x="46" y="142" fill="#99f6e4">README.md#quickstart</text>
-      <text x="72" y="176" fill="#cbd5e1">runner: local</text>
-      <text x="72" y="208" fill="#cbd5e1">workspace copy: tracked</text>
-      <text x="72" y="240" fill="#cbd5e1">shell: sh</text>
-      <text x="72" y="272" fill="#cbd5e1">timeout: 120s</text>
-      <text x="46" y="326" fill="#e5e7eb">$ setupproof README.md</text>
+      <text x="72" y="174" fill="#94a3b8">execution</text>
+      <text x="98" y="204" fill="#cbd5e1">runner: local</text>
+      <text x="98" y="232" fill="#cbd5e1">timeout: 120s</text>
+      <text x="72" y="264" fill="#94a3b8">workspace</text>
+      <text x="98" y="294" fill="#cbd5e1">copy: tracked</text>
+      <text x="46" y="334" fill="#e5e7eb">$ setupproof README.md</text>
     </g>
 
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
-      <text x="46" y="354">
+      <text x="46" y="362">
         <tspan fill="#2dd4bf">==&gt;</tspan><tspan fill="#f8fafc" font-weight="700"> Running</tspan><tspan fill="#cbd5e1"> README.md#quickstart</tspan><tspan fill="#94a3b8">  1.46s</tspan>
       </text>
-      <text x="46" y="382">
+      <text x="46" y="388">
         <tspan fill="#86efac" font-weight="700">+ README.md#quickstart passed</tspan><tspan fill="#94a3b8" font-weight="400">  1.61s</tspan>
       </text>
     </g>

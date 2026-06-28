@@ -118,6 +118,27 @@ func TestLocalRunnerProgressShowsMultiBlockCount(t *testing.T) {
 	}
 }
 
+func TestLocalRunnerProgressTruncatesLongLiveLabel(t *testing.T) {
+	dir := gitRepo(t)
+	file := "docs/very/long/path/for/progress/with/a/deeply/nested/readme.md"
+	blockID := "quickstart-with-a-long-anchor-that-should-stay-readable"
+	writeFile(t, dir, file, "```sh setupproof id="+blockID+"\nsleep 1\n```\n")
+	gitAdd(t, dir, file)
+
+	code, _, stderr := runLocal(t, dir, planning.Request{CWD: dir, Positional: []string{file}}, Options{Progress: true})
+	if code != 0 {
+		t.Fatalf("exit code = %d\nstderr:\n%s", code, stderr)
+	}
+	plain := stripRunnerANSI(stderr)
+	fullID := file + "#" + blockID
+	if !strings.Contains(plain, "...") {
+		t.Fatalf("progress output did not truncate live label:\n%s", plain)
+	}
+	if !strings.Contains(plain, fullID+" passed") {
+		t.Fatalf("progress completion should keep full block id:\n%s", plain)
+	}
+}
+
 func TestLocalRunnerProgressSuspendsForCommandOutput(t *testing.T) {
 	dir := gitRepo(t)
 	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart\nprintf 'install dependencies\\n'\n```\n")

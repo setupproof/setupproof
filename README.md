@@ -2,15 +2,14 @@
 
 [![SetupProof](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml/badge.svg)](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml)
 
-Test marked README quickstarts from a clean workspace before contributors hit
-them.
+Prove README setup commands still run from a clean checkout.
 
 Setup docs drift because normal CI checks the code, not the commands people
 copy from the README. A renamed Compose service, a moved package path, or an
 install command that no longer matches the lockfile can turn the first five
 minutes into guesswork. SetupProof gives maintainers a small, explicit check
-for that boundary: mark the shell block you expect to keep working, then run
-the same block locally or in CI.
+for that boundary: mark the shell block you expect to keep working, then run it
+locally or in CI.
 
 ![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
 
@@ -32,14 +31,12 @@ If that setup path breaks, the failure points back to the README block people
 would have copied:
 
 ```text
-! SetupProof failed
-  1 block, 1 file, 742ms
+! SetupProof failed  742ms
+  1 block, 1 file
 
-! README.md#quickstart
-  file=README.md:18
-  runner=local
-  timeout=120s result=failed exit=1
-  next command: setupproof review README.md
+! README.md#quickstart failed  742ms
+  README.md:18 runner=local timeout=120s result=failed exit=1 reason=exit-code
+  next: setupproof review README.md
 ```
 
 The goal is not to lint Markdown. The goal is to keep the public setup path
@@ -92,13 +89,11 @@ setupproof README.md
 Typical local output is compact and scan-friendly:
 
 ```text
-+ SetupProof passed
-  1 block, 1 file, 35ms
++ SetupProof passed  35ms
+  1 block, 1 file
 
-+ README.md#quickstart
-  file=README.md:12
-  runner=local
-  timeout=120s result=passed
++ README.md#quickstart passed  35ms
+  README.md:12 runner=local timeout=120s result=passed
 ```
 
 Interactive terminals wait briefly, then show a styled live line with the current phase, block count, and elapsed time.
