@@ -9,6 +9,9 @@ topics:
   - github-actions
   - cli
   - testing
+  - continuous-integration
   - developer-tools
+  - docs-as-code
   - quickstart
   - readme
+  - readme-testing
