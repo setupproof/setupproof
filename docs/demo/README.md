@@ -1,10 +1,10 @@
 # Demo
 
-`setupproof.gif` is the short terminal demo used by the main README.
-`setupproof.tape` is the VHS source, and `prepare-recording.sh` prepares the
-temporary project used by that recording.
+`setupproof.gif` is the short terminal demo used by the main README. The VHS
+source is `setupproof.tape`; `prepare-recording.sh` builds the temporary
+project used by the recording.
 
-The GIF shows the maintainer path:
+The GIF shows the adoption path:
 
 1. inspect the marked README quickstart;
 2. review execution, workspace, environment, and report semantics without

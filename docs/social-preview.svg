@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
   <title id="title">SetupProof</title>
-  <desc id="desc">README quickstart verification shown as a README block connected to terminal output</desc>
+  <desc id="desc">Marked README setup block connected to a clean checkout terminal report</desc>
 
   <rect width="1280" height="640" fill="#f6f7f2"/>
   <path d="M0 112H1280M0 244H1280M0 376H1280M0 508H1280" stroke="#dfe5dc" stroke-width="1"/>
@@ -11,7 +11,7 @@
     <path d="M16 21L25 28L16 35" fill="none" stroke="#e5e7eb" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M30 36H41" fill="none" stroke="#14b8a6" stroke-width="4.5" stroke-linecap="round"/>
     <text x="72" y="36" fill="#111827" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="38" font-weight="780">SetupProof</text>
-    <text x="310" y="35" fill="#546179" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">README quickstart verification</text>
+    <text x="310" y="35" fill="#546179" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19">fresh-clone setup checks</text>
   </g>
 
   <g transform="translate(78 148)">
@@ -23,9 +23,9 @@
 
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20">
       <text x="28" y="100" fill="#9ca3af">01</text>
-      <text x="70" y="100" fill="#111827" font-weight="700"># Demo service</text>
+      <text x="70" y="100" fill="#111827" font-weight="700"># README setup</text>
       <text x="28" y="146" fill="#9ca3af">03</text>
-      <text x="70" y="146" fill="#374151">This is the setup path:</text>
+      <text x="70" y="146" fill="#374151">Commands contributors copy:</text>
 
       <rect x="58" y="178" width="404" height="152" rx="12" fill="#ecfdf5" stroke="#99f6e4" stroke-width="2"/>
       <text x="28" y="210" fill="#9ca3af">05</text>
@@ -61,27 +61,27 @@
       <text x="98" y="204" fill="#cbd5e1">runner: local</text>
       <text x="98" y="232" fill="#cbd5e1">timeout: 120s</text>
       <text x="72" y="264" fill="#94a3b8">workspace</text>
-      <text x="98" y="294" fill="#cbd5e1">copy: tracked</text>
+      <text x="98" y="294" fill="#cbd5e1">copy: tracked workspace</text>
       <text x="46" y="334" fill="#e5e7eb">$ setupproof README.md</text>
     </g>
 
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
       <text x="46" y="362">
-        <tspan fill="#2dd4bf">==&gt;</tspan><tspan fill="#f8fafc" font-weight="700"> Running</tspan><tspan fill="#cbd5e1"> README.md#quickstart</tspan><tspan fill="#94a3b8">  1.46s</tspan>
+        <tspan fill="#86efac" font-weight="700">+ SetupProof passed</tspan><tspan fill="#94a3b8" font-weight="400">  1.61s</tspan>
       </text>
       <text x="46" y="388">
-        <tspan fill="#86efac" font-weight="700">+ README.md#quickstart passed</tspan><tspan fill="#94a3b8" font-weight="400">  1.61s</tspan>
+        <tspan fill="#cbd5e1">README.md:12 result=passed</tspan>
       </text>
     </g>
   </g>
 
   <g transform="translate(82 588)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" fill="#546179">
-    <text x="0" y="0">clean workspace</text>
-    <circle cx="178" cy="-6" r="4" fill="#0f766e"/>
-    <text x="198" y="0">GitHub Action</text>
-    <circle cx="360" cy="-6" r="4" fill="#0f766e"/>
-    <text x="380" y="0">Apache-2.0</text>
-    <circle cx="540" cy="-6" r="4" fill="#0f766e"/>
-    <text x="560" y="0">no telemetry</text>
+    <text x="0" y="0">clean checkout</text>
+    <circle cx="176" cy="-6" r="4" fill="#0f766e"/>
+    <text x="198" y="0">line-level report</text>
+    <circle cx="402" cy="-6" r="4" fill="#0f766e"/>
+    <text x="424" y="0">GitHub Action</text>
+    <circle cx="604" cy="-6" r="4" fill="#0f766e"/>
+    <text x="626" y="0">no telemetry</text>
   </g>
 </svg>

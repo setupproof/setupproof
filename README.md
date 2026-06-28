@@ -2,21 +2,25 @@
 
 [![SetupProof](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml/badge.svg)](https://github.com/setupproof/setupproof/actions/workflows/setupproof.yml)
 
-Prove README setup commands still run from a clean checkout.
+Run the README setup path from a clean checkout before contributors copy it.
 
-Setup docs drift because normal CI checks the code, not the commands people
-copy from the README. A renamed Compose service, a moved package path, or an
-install command that no longer matches the lockfile can turn the first five
-minutes into guesswork. SetupProof gives maintainers a small, explicit check
-for that boundary: mark the shell block you expect to keep working, then run it
-locally or in CI.
+Normal CI proves code; it rarely proves the commands someone runs in the first
+five minutes. SetupProof lets maintainers mark the setup block they want to
+stand behind, then run that exact block locally or in CI from a copied
+workspace. If it breaks, the report points back to the README line that needs
+fixing.
+
+- Mark only the trusted shell block.
+- Review the plan without executing commands.
+- Run the block locally or in GitHub Actions, with no telemetry and no secret
+  environment passthrough unless configured.
 
 ![Terminal demo showing SetupProof reviewing and running a marked README quickstart](docs/demo/setupproof.gif)
 
 ## What It Catches
 
 README quickstarts usually fail in small, ordinary ways: a package moves, a test
-command changes, or a prerequisite is no longer true. SetupProof turns the
+command changes, or a prerequisite stops being true. SetupProof turns the
 marked block into the thing CI verifies.
 
 ````md
@@ -40,7 +44,7 @@ would have copied:
 ```
 
 The goal is not to lint Markdown. The goal is to keep the public setup path
-runnable from a clean checkout.
+runnable from a fresh clone.
 
 Good first targets are the commands a new contributor runs before they know the
 project: install dependencies, run the default tests, start the local service,

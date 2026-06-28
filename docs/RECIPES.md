@@ -1,6 +1,7 @@
 # Configuration Recipes
 
-Copyable `setupproof.yml` starters for common repository layouts. Each recipe
+Use a config when no-argument runs should inspect more than the root README, or
+when a setup path needs runner, timeout, or environment defaults. Each recipe
 sticks to fields documented in `schemas/setupproof-config.schema.json` and
 explains the tradeoff in one or two sentences.
 
@@ -59,11 +60,11 @@ files:
 
 Set `requireBlocks: false` for repositories whose docs pages mostly contain
 prose plus illustrative commands that should not be executed unattended. With
-this recipe, run `setupproof review` (or in CI, `setupproof
---list`) to inspect what SetupProof would discover without actually running
-any block. This keeps the v0.1 review path useful for archives and copy-this-
-verbatim guides, at the cost of losing the safety net that `requireBlocks:
-true` provides for active install docs.
+this recipe, run `setupproof review` (or `setupproof --list` in CI) to inspect
+what SetupProof would discover without executing any block. This keeps the
+v0.1 review path useful for archives and copy-this-verbatim guides, at the cost
+of losing the safety net that `requireBlocks: true` provides for active install
+docs.
 
 ## Projects That Require Docker For Setup Verification
 

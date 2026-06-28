@@ -8,11 +8,11 @@ assignees: ""
 
 ## Summary
 
-What happened, and what did you expect?
+What did SetupProof do, and what should it have done instead?
 
 ## Reproduction
 
-Use the smallest Markdown file and config that demonstrate the issue.
+Use the smallest Markdown file and config that reproduce the issue.
 
 ````md
 <!-- setupproof id=example -->

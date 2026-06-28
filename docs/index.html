@@ -6,7 +6,7 @@
     <title>SetupProof</title>
     <meta
       name="description"
-      content="Test marked README quickstarts from a clean workspace before contributors hit them."
+      content="Run README setup commands from a clean checkout before contributors copy them."
     >
     <link
       rel="icon"
@@ -15,7 +15,7 @@
     <meta property="og:title" content="SetupProof">
     <meta
       property="og:description"
-      content="README quickstart verification for maintainers."
+      content="Keep README setup commands runnable from a clean checkout."
     >
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://setupproof.github.io/setupproof/">
@@ -27,7 +27,7 @@
     <meta name="twitter:title" content="SetupProof">
     <meta
       name="twitter:description"
-      content="README quickstart verification for maintainers."
+      content="Keep README setup commands runnable from a clean checkout."
     >
     <meta
       name="twitter:image"
@@ -183,6 +183,11 @@
         transform: translateY(-2px);
       }
 
+      .button:focus-visible {
+        outline: 3px solid color-mix(in srgb, var(--teal) 62%, #ffffff);
+        outline-offset: 3px;
+      }
+
       .button.secondary:hover {
         border-color: var(--teal);
         color: var(--teal-dark);
@@ -328,6 +333,14 @@
       .case-list li {
         padding: 20px 0;
         border-bottom: 1px solid var(--line);
+        transition:
+          color 180ms ease,
+          transform 180ms ease;
+      }
+
+      .case-list li:hover {
+        color: var(--teal-dark);
+        transform: translateX(6px);
       }
 
       .case-list strong {
@@ -363,6 +376,11 @@
         gap: 18px;
         padding: 20px 0;
         border-bottom: 1px solid var(--line);
+        transition: transform 180ms ease;
+      }
+
+      .steps li:hover {
+        transform: translateX(6px);
       }
 
       .steps span {
@@ -408,12 +426,15 @@
         white-space: nowrap;
       }
 
-      .reveal {
-        opacity: 1;
-        transform: none;
+      .motion-ready .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 520ms ease,
+          transform 520ms ease;
       }
 
-      .reveal.visible {
+      .motion-ready .reveal.visible {
         opacity: 1;
         transform: none;
       }
@@ -445,7 +466,7 @@
         .proof,
         .cases,
         .workflow-grid {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
         }
 
         .hero {
@@ -454,6 +475,7 @@
         }
 
         .demo img {
+          min-width: 0;
           width: 100%;
         }
 
@@ -523,18 +545,18 @@
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">README quickstart verification</p>
+          <p class="eyebrow">Fresh-clone setup checks</p>
           <h1 id="hero-title">SetupProof</h1>
           <p class="lede">
-            Run the setup command people copy from the README before a new
-            contributor has to debug it.
+            Mark the README setup block you stand behind. Run it from a copied
+            workspace and get the exact line to fix when it drifts.
           </p>
           <div class="actions">
             <a class="button primary" href="https://github.com/setupproof/setupproof#install">
-              Install
+              Install CLI
             </a>
             <a class="button secondary" href="https://github.com/setupproof/setupproof#github-actions">
-              GitHub Action
+              Add Action
             </a>
           </div>
         </div>
@@ -555,7 +577,7 @@
       <section class="proof reveal" id="proof" aria-labelledby="proof-title">
         <div>
           <p class="section-kicker">What it catches</p>
-          <h2 id="proof-title">A broken README should fail in CI.</h2>
+          <h2 id="proof-title">Let a broken README quickstart fail in CI.</h2>
           <p>
             SetupProof runs the shell block maintainers explicitly mark, then
             reports the README location that needs attention.
@@ -568,16 +590,12 @@
 npm ci
 npm test
 ```</code></pre>
-          <pre><code><span class="fail">!</span> SetupProof failed
-  1 block, 1 file, 742ms
+          <pre><code><span class="fail">!</span> SetupProof failed  742ms
+  1 block, 1 file
 
-<span class="fail">!</span> README.md#quickstart
-  file=README.md:18
-  runner=local
-  timeout=120s result=failed
-  exit=1
-  next command:
-    setupproof review README.md</code></pre>
+<span class="fail">!</span> README.md#quickstart failed  742ms
+  README.md:18 runner=local timeout=120s result=failed exit=1 reason=exit-code
+  next: setupproof review README.md</code></pre>
           <p class="terminal-note">
             Fix the setup path once, in the same place contributors read it.
           </p>
@@ -588,7 +606,7 @@ npm test
         <div>
           <p class="section-kicker">Where it helps</p>
           <h2 id="examples-title">
-            Catch the boring break before a contributor does.
+            Catch the small break before a contributor does.
           </h2>
           <p>
             Setup docs usually fail because something small moved and nobody
@@ -627,8 +645,8 @@ npm test
             <p class="section-kicker">Maintainer path</p>
             <h2 id="workflow-title">Mark, review, run.</h2>
             <p>
-              Keep prose examples inert by default and make only the real setup
-              path executable.
+              Keep prose examples inert and make only the real setup path
+              executable.
             </p>
           </div>
 
@@ -673,6 +691,8 @@ npm test
     </main>
 
     <script>
+      document.documentElement.classList.add("motion-ready");
+
       const observer = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {

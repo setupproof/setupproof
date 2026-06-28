@@ -1,17 +1,17 @@
 ## Summary
 
-What changed, and why?
+What changed? What should reviewers focus on?
 
 ## Scope
 
-- Docs
-- Examples
-- Tests
-- Parser
-- Planning
-- Runner
-- Reports
-- Action
+- [ ] Docs
+- [ ] Examples
+- [ ] Tests
+- [ ] Parser
+- [ ] Planning
+- [ ] Runner
+- [ ] Reports
+- [ ] Action
 
 ## Checks
 

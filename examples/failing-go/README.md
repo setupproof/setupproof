@@ -6,8 +6,8 @@ failing example so maintainers can verify SetupProof's failure output
 end-to-end, and so the docs have a concrete reference for "what does a
 real failure look like".
 
-The marked block targets `./internal/greeter`, but the package actually
-lives under `./pkg/greeter` (a common drift pattern: a contributor moves
+The marked block targets `./internal/greeter`, but the package now lives under
+`./pkg/greeter` (a common drift pattern: a contributor moves
 a package and forgets to update the README). Running the block from a
 clean checkout fails with an exit-1 from `go test`.
 

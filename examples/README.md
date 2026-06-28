@@ -1,8 +1,9 @@
 # SetupProof Examples
 
-These are small example projects with marked quickstart blocks. They are meant
-to show realistic SetupProof inputs, not distribution or release instructions
-for SetupProof itself.
+These small projects show which README blocks make good SetupProof targets:
+setup commands that should keep working from a clean checkout. They are example
+inputs for the CLI, not distribution or release instructions for SetupProof
+itself.
 
 Examples included:
 

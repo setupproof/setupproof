@@ -6,9 +6,9 @@ labels: "support"
 assignees: ""
 ---
 
-## What failed?
+## Marked Block
 
-Describe the marked block and the expected setup behavior.
+Which file and block ID failed? What setup path is the block meant to prove?
 
 ## Command
 
