@@ -13,6 +13,16 @@ import (
 const (
 	progressStartDelay = 160 * time.Millisecond
 	progressTick       = 120 * time.Millisecond
+	progressPhaseWidth = 15
+	progressCountWidth = 3
+	progressTimeWidth  = 7
+)
+
+const (
+	progressANSIReset = "\x1b[0m"
+	progressANSIBold  = "\x1b[1m"
+	progressANSIDim   = "\x1b[2m"
+	progressANSICyan  = "\x1b[36m"
 )
 
 type progressSpanKind int
@@ -39,6 +49,7 @@ type progressSpan struct {
 	blockID                string
 	label                  string
 	phase                  string
+	count                  string
 	started                time.Time
 	done                   chan struct{}
 	stopOnce               sync.Once
@@ -73,8 +84,9 @@ func (p *terminalProgress) StartBlock(block planning.Block) *progressSpan {
 	p.current++
 	span.kind = progressSpanBlock
 	span.blockID = block.QualifiedID
-	span.label = progressLabel(block.QualifiedID, p.current, p.total)
+	span.label = block.QualifiedID
 	span.phase = "Running"
+	span.count = progressCount(p.current, p.total)
 	span.started = time.Now()
 	span.done = make(chan struct{})
 	p.active = span
@@ -125,7 +137,7 @@ func (p *terminalProgress) writeOutput(data []byte) (int, error) {
 			if span.rendered {
 				p.clearLocked()
 			}
-			fmt.Fprintf(p.w, "==> %s\n", span.outputLabel())
+			fmt.Fprintf(p.w, "%s %s\n", progressPrefix(p.noColor), span.outputLabel(p.noColor))
 			span.outputSeen = true
 			span.stop()
 		}
@@ -174,7 +186,7 @@ func (s *progressSpan) Finish(result string, durationMs int64) {
 		p.clearLocked()
 	}
 	if s.kind == progressSpanBlock {
-		fmt.Fprintf(p.w, "%s %s %s in %s\n", progressStatus(result, p.noColor), s.blockID, progressResultText(result), progressDuration(durationMs))
+		fmt.Fprintln(p.w, progressCompletionLine(result, s.blockID, durationMs, p.noColor))
 	}
 	p.active = nil
 }
@@ -220,38 +232,49 @@ func (s *progressSpan) stop() {
 }
 
 func (p *terminalProgress) renderLocked(s *progressSpan) {
-	fmt.Fprintf(p.w, "\r\x1b[2K==> %s %s", s.activityLabel(), progressDuration(time.Since(s.started).Milliseconds()))
+	fmt.Fprintf(p.w, "\r\x1b[2K%s %s", progressPrefix(p.noColor), s.activityLabel(p.noColor, time.Since(s.started).Milliseconds()))
 }
 
 func (p *terminalProgress) clearLocked() {
 	fmt.Fprint(p.w, "\r\x1b[2K")
 }
 
-func (s *progressSpan) activityLabel() string {
+func (s *progressSpan) activityLabel(noColor bool, durationMs int64) string {
+	elapsed := progressDim(progressPadded(progressDuration(durationMs), progressTimeWidth), noColor)
 	if s.kind == progressSpanPhase {
-		return s.label
+		return progressBold(s.label, noColor) + "  " + elapsed
 	}
-	if s.phase == "" {
-		return s.label
+	phase := s.phase
+	if phase == "" {
+		phase = "Running"
 	}
-	return s.phase + " " + s.label
+	line := progressBold(progressPaddedRight(phase, progressPhaseWidth), noColor) + "  " + s.label
+	if s.count != "" {
+		line += "  " + progressDim(progressPadded(s.count, progressCountWidth), noColor)
+	}
+	return line + "  " + elapsed
 }
 
-func (s *progressSpan) outputLabel() string {
+func (s *progressSpan) outputLabel(noColor bool) string {
 	if s.kind == progressSpanPhase {
-		return s.label
+		return progressBold(s.label, noColor)
 	}
-	if s.phase == "" {
-		return s.blockID
+	phase := s.phase
+	if phase == "" {
+		phase = "Running"
 	}
-	return s.phase + " " + s.blockID
+	label := progressBold(phase, noColor) + " " + s.blockID
+	if s.count != "" {
+		label += " " + progressDim(s.count, noColor)
+	}
+	return label
 }
 
-func progressLabel(blockID string, index int, total int) string {
+func progressCount(index int, total int) string {
 	if total <= 1 {
-		return blockID
+		return ""
 	}
-	return fmt.Sprintf("%s (%d/%d)", blockID, index, total)
+	return fmt.Sprintf("%d/%d", index, total)
 }
 
 func progressStatus(result string, noColor bool) string {
@@ -277,6 +300,47 @@ func progressColor(result string) string {
 	default:
 		return "\x1b[31m"
 	}
+}
+
+func progressCompletionLine(result string, blockID string, durationMs int64, noColor bool) string {
+	return fmt.Sprintf("%s %s %-7s %s", progressStatus(result, noColor), blockID, progressResultText(result), progressDim(progressPadded(progressDuration(durationMs), progressTimeWidth), noColor))
+}
+
+func progressPrefix(noColor bool) string {
+	return progressCyan("==>", noColor)
+}
+
+func progressBold(value string, noColor bool) string {
+	return progressStyle(value, progressANSIBold, noColor)
+}
+
+func progressDim(value string, noColor bool) string {
+	return progressStyle(value, progressANSIDim, noColor)
+}
+
+func progressCyan(value string, noColor bool) string {
+	return progressStyle(value, progressANSICyan, noColor)
+}
+
+func progressStyle(value string, style string, noColor bool) string {
+	if noColor || value == "" {
+		return value
+	}
+	return style + value + progressANSIReset
+}
+
+func progressPadded(value string, width int) string {
+	if len(value) >= width {
+		return value
+	}
+	return fmt.Sprintf("%*s", width, value)
+}
+
+func progressPaddedRight(value string, width int) string {
+	if len(value) >= width {
+		return value
+	}
+	return fmt.Sprintf("%-*s", width, value)
 }
 
 func progressResultText(result string) string {

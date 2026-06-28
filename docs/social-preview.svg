@@ -65,8 +65,12 @@
     </g>
 
     <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18">
-      <text x="46" y="354" fill="#cbd5e1">==&gt; Running README.md#quickstart</text>
-      <text x="46" y="382" fill="#86efac" font-weight="700">+ README.md#quickstart passed</text>
+      <text x="46" y="354">
+        <tspan fill="#2dd4bf">==&gt;</tspan><tspan fill="#f8fafc" font-weight="700"> Running</tspan><tspan fill="#cbd5e1"> README.md#quickstart</tspan><tspan fill="#94a3b8">  1.46s</tspan>
+      </text>
+      <text x="46" y="382">
+        <tspan fill="#86efac" font-weight="700">+ README.md#quickstart passed</tspan><tspan fill="#94a3b8" font-weight="400">  1.61s</tspan>
+      </text>
     </g>
   </g>
 

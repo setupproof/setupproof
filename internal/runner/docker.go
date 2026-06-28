@@ -59,7 +59,7 @@ func runPreparedDocker(req planning.Request, plan planning.Plan, opts Options, s
 		return executionRun{code: 2}
 	}
 	progress := newTerminalProgress(stderr, opts, len(plan.Blocks))
-	sourceSpan := progress.StartPhase("Preparing repository copy")
+	sourceSpan := progress.StartPhase("Preparing repo")
 	source, warnings, code, runnerError, ok := prepareWorkspaceSource(req, plan, progress.OutputWriter())
 	if !ok {
 		sourceSpan.Finish("error", 0)
@@ -114,7 +114,7 @@ func validateDockerPlan(plan planning.Plan) error {
 }
 
 func runDockerFile(ctx context.Context, file string, blocks []planning.Block, envPlan planning.Env, source workspaceSource, opts Options, stderr io.Writer, progress *terminalProgress, imageRecorder *dockerImageRecorder, signalReason func() string) (code int, blockReports []report.Block, runnerError string) {
-	workspaceSpan := progress.StartPhase("Preparing Docker workspace for " + file)
+	workspaceSpan := progress.StartPhase("Preparing Docker")
 	workspaceStderr := progress.OutputWriter()
 	sharedWorkspace, err := createDockerWorkspace(source)
 	if err != nil {
@@ -126,7 +126,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		fmt.Fprint(workspaceStderr, keepWorkspaceWarning(file, sharedWorkspace.repoRoot))
 	}
 	defer func() {
-		cleanupSpan := progress.StartPhase("Cleaning up Docker workspace for " + file)
+		cleanupSpan := progress.StartPhase("Cleaning up")
 		cleanupStderr := progress.OutputWriter()
 		if err := sharedWorkspace.cleanup(opts.KeepWorkspace); err != nil {
 			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
@@ -153,7 +153,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		if container == nil {
 			return 0, ""
 		}
-		cleanupSpan := progress.StartPhase("Stopping Docker container for " + file)
+		cleanupSpan := progress.StartPhase("Stopping Docker")
 		cleanupStderr := progress.OutputWriter()
 		if err := removeDockerContainer(context.Background(), container.name, cleanupStderr); err != nil {
 			fmt.Fprintf(cleanupStderr, "%s: cleanup failed: %v\n", file, err)
@@ -204,7 +204,7 @@ func runDockerFile(ctx context.Context, file string, blocks []planning.Block, en
 		isolated := block.Options.Isolated
 
 		if isolated {
-			span.Phase("Preparing Docker workspace")
+			span.Phase("Preparing Docker")
 			activeWorkspace, err = createDockerWorkspace(source)
 			if err != nil {
 				fmt.Fprintf(blockStderr, "%s: workspace setup failed: %v\n", block.QualifiedID, err)
