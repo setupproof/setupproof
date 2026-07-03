@@ -53,7 +53,14 @@ are exactly the failures SetupProof makes visible.
 
 ## Install
 
-Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
+With Homebrew:
+
+```sh
+brew install setupproof/tap/setupproof
+setupproof --version
+```
+
+With Go 1.22 or newer:
 
 ```sh
 go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.3
