@@ -1,9 +1,18 @@
 # Install And CI
 
 Install the CLI when you want to verify marked README setup blocks locally or
-in CI. SetupProof v0.1.3 ships as a Go module, GitHub release archives, and a
-versioned composite GitHub Action. npm registry, Homebrew, winget, Chocolatey,
-and Scoop packages are not published yet.
+in CI. SetupProof v0.1.3 ships as a Go module, Homebrew tap, GitHub release
+archives, and a versioned composite GitHub Action. npm registry, winget,
+Chocolatey, and Scoop packages are not published yet.
+
+## Homebrew
+
+```sh
+brew install setupproof/tap/setupproof
+setupproof --version
+setupproof review README.md
+setupproof --require-blocks --no-color --no-glyphs README.md
+```
 
 ## Go Install
 
@@ -192,11 +201,12 @@ blocks.
 Published for v0.1.3:
 
 - Go install from the public module path.
+- Homebrew tap install from `setupproof/tap`.
 - Linux and macOS release archives with checksums.
 - Versioned GitHub Action usage with `cli-version: v0.1.3`.
 
 Deferred until implemented and verified:
 
 - npm registry publication.
-- Homebrew, winget, Chocolatey, and Scoop packages.
+- winget, Chocolatey, and Scoop packages.
 - GitHub Marketplace listing.

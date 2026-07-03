@@ -17,7 +17,8 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 	doc := string(data)
 
 	for _, want := range []string{
-		"SetupProof v0.1.3 ships as a Go module",
+		"SetupProof v0.1.3 ships as a Go module, Homebrew tap",
+		"brew install setupproof/tap/setupproof",
 		"go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.3",
 		"setupproof_0.1.3_checksums.txt",
 		"Native Windows execution is unsupported in v0.1",
@@ -37,7 +38,6 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 		"npx setup" + "proof",
 		"npm install -g setup" + "proof",
 		"npm i -g setup" + "proof",
-		"brew install setup" + "proof",
 		"winget install setup" + "proof",
 		"choco install setup" + "proof",
 		"scoop install setup" + "proof",

@@ -1,8 +1,9 @@
 # Security
 
-SetupProof v0.1 is distributed through the Go module path, GitHub release
-archives, source checkouts, and versioned GitHub Action tags. Other package
-manager paths are documented only after they are published and verified.
+SetupProof v0.1 is distributed through the Go module path, Homebrew tap, GitHub
+release archives, source checkouts, and versioned GitHub Action tags.
+Additional package manager paths are documented only after they are published
+and verified.
 
 ## Reporting Security Issues
 

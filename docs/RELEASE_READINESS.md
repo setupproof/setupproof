@@ -37,6 +37,14 @@ npm package gates:
 - npm install commands stay out of public install docs until the registry
   package is published.
 
+Homebrew tap gates:
+
+- `setupproof/homebrew-tap` formula uses the current release archive URLs and
+  matching sha256 values from the release checksum manifest.
+- `brew audit --strict --online setupproof/tap/setupproof` passes.
+- `brew install setupproof/tap/setupproof`, `brew test
+  setupproof/tap/setupproof`, and `setupproof --version` pass.
+
 Release automation gates:
 
 - `.github/workflows/release-checks.yml` runs the full repository gate, static
@@ -71,6 +79,6 @@ Repository publication gates:
 Deferred distribution gates:
 
 - npm registry publication exists before npm install commands are documented.
-- Homebrew, winget, Chocolatey, and Scoop packages exist before they are named
-  as install options.
+- winget, Chocolatey, and Scoop packages exist before they are named as install
+  options.
 - Marketplace listing must exist before Marketplace availability is advertised.
