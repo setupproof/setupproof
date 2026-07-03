@@ -6,7 +6,7 @@ in `docs/adr/`.
 ## Runtime
 
 SetupProof uses a Go CLI. The GitHub Action is a composite Action that invokes
-the CLI. v0.1.2 is distributed through `go install`, GitHub release archives,
+the CLI. v0.1.3 is distributed through `go install`, GitHub release archives,
 and a pinned composite Action. The release tooling also stages and smoke-tests
 an npm tarball; npm registry publication and operating-system package managers
 remain deferred until those packages exist.
@@ -64,6 +64,6 @@ an immutable public URL for released schemas.
 
 ## Marketplace
 
-GitHub Marketplace listing is deferred for v0.1. The main product repository
-remains the source of truth until current Marketplace requirements are checked
-against the repository strategy.
+GitHub Marketplace listing is planned from the main product repository using
+the root `action.yml`. Public docs do not advertise Marketplace availability
+until the listing exists. ADR 0008 records the repository strategy and fallback.

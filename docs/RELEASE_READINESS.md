@@ -1,6 +1,6 @@
 # Release Readiness
 
-SetupProof v0.1.2 is released through the Go module path, GitHub release
+SetupProof v0.1.3 is released through the Go module path, GitHub release
 archives, and a versioned composite GitHub Action.
 
 Before tagging a release, verify:

@@ -1,7 +1,8 @@
 # Security
 
-SetupProof v0.1 runs from this source tree. Packaged installs and external
-Action tag examples are not published yet.
+SetupProof v0.1 is distributed through the Go module path, GitHub release
+archives, source checkouts, and versioned GitHub Action tags. Other package
+manager paths are documented only after they are published and verified.
 
 ## Reporting Security Issues
 
