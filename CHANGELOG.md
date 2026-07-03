@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.3 - 2026-07-03
+
+- Updated public repository and Action metadata for distribution channels.
+- Refreshed npm package metadata for registry publication readiness.
+- Updated release documentation for the current distribution baseline.
+
 ## 0.1.2 - 2026-06-27
 
 - Changed `setupproof init --workflow` to generate the released Action

@@ -1,6 +1,6 @@
 # Support
 
-SetupProof v0.1.2 can run from the Go module install path, release archives, a
+SetupProof v0.1.3 can run from the Go module install path, release archives, a
 source checkout, or the pinned GitHub Action.
 
 For help with a run, include enough context to identify the marked block and

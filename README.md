@@ -56,7 +56,7 @@ are exactly the failures SetupProof makes visible.
 Prerequisites: Go 1.22 or newer, Git, and a POSIX shell.
 
 ```sh
-go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.2
+go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.3
 setupproof --version
 ```
 
@@ -164,15 +164,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: setupproof/setupproof@v0.1.2
+      - uses: setupproof/setupproof@v0.1.3
         with:
-          cli-version: v0.1.2
+          cli-version: v0.1.3
           mode: review
           require-blocks: "true"
           files: README.md
-      - uses: setupproof/setupproof@v0.1.2
+      - uses: setupproof/setupproof@v0.1.3
         with:
-          cli-version: v0.1.2
+          cli-version: v0.1.3
           require-blocks: "true"
           files: README.md
 ```

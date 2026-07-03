@@ -31,4 +31,4 @@ jobs:
       - name: Run workflow lint
         run: make actionlint
       - name: Verify release archives
-        run: make release-check VERSION=0.1.2
+        run: make release-check VERSION=0.1.3

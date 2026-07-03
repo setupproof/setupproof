@@ -1,7 +1,7 @@
 {
   "name": "setupproof",
   "version": "__VERSION__",
-  "description": "Test marked README quickstarts from a clean workspace.",
+  "description": "Run README setup commands from a clean checkout before contributors copy them.",
   "license": "Apache-2.0",
   "homepage": "https://setupproof.github.io/setupproof/",
   "repository": {
@@ -11,6 +11,17 @@
   "bugs": {
     "url": "https://github.com/setupproof/setupproof/issues"
   },
+  "keywords": [
+    "readme",
+    "quickstart",
+    "ci",
+    "github-actions",
+    "documentation",
+    "markdown",
+    "setup",
+    "testing",
+    "developer-tools"
+  ],
   "bin": {
     "setupproof": "bin/setupproof"
   },
