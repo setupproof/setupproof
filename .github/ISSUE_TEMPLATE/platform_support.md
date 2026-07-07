@@ -30,4 +30,5 @@ What setup-doc workflow should work on this platform?
 ## Notes
 
 Native Windows and PowerShell execution are outside v0.1 scope. Proposals for
-new platform behavior should explain test coverage and report compatibility.
+new platform behavior should start from ADR 0010 and explain test coverage,
+shell semantics, path behavior, environment behavior, and report compatibility.

@@ -78,7 +78,9 @@ Marked shell fences need a supported shell. In v0.1, use `sh`, `bash`, or
 `shell` fences.
 
 Native Windows execution and PowerShell fences are unsupported in v0.1. On
-Windows, run SetupProof through WSL2.
+Windows, run SetupProof through WSL2. ADR 0010 records the native Windows
+support boundary and the compatibility work required before support is
+documented.
 
 ## Docker Runner Problems
 

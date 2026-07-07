@@ -4,6 +4,7 @@ set -eu
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 DOC="$ROOT/docs/INSTALL.md"
+NATIVE_WINDOWS_ADR="$ROOT/docs/adr/0010-native-windows-support-scope.md"
 PUBLIC_DOCS="$ROOT/README.md
 $ROOT/LICENSE
 $ROOT/CODE_OF_CONDUCT.md
@@ -57,6 +58,7 @@ assert_not_contains() {
 }
 
 [ -f "$DOC" ] || fail "missing docs/INSTALL.md"
+[ -f "$NATIVE_WINDOWS_ADR" ] || fail "missing native Windows ADR"
 [ -f "$ROOT/schemas/setupproof-config.schema.json" ] || fail "missing config schema"
 for file in $PUBLIC_DOCS; do
   [ -f "$file" ] || fail "missing public doc: $file"
@@ -69,6 +71,13 @@ assert_contains "$DOC" "<!-- ci-snippet:generic-shell -->"
 assert_contains "$DOC" "Native Windows execution is unsupported in v0.1"
 assert_contains "$DOC" "PowerShell fenced blocks are unsupported in v0.1"
 assert_contains "$DOC" "WSL2"
+assert_contains "$DOC" "ADR 0010 records the native Windows support boundary"
+assert_contains "$NATIVE_WINDOWS_ADR" "Native Windows execution remains unsupported in v0.1"
+assert_contains "$NATIVE_WINDOWS_ADR" "Windows CI coverage runs the relevant CLI, runner, report, and docs tests"
+assert_contains "$NATIVE_WINDOWS_ADR" 'PowerShell and `cmd` fences are unsupported'
+assert_contains "$ROOT/docs/DECISIONS.md" "ADR 0010 records the support boundary"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "ADR 0010 records the native Windows"
+assert_contains "$ROOT/.github/ISSUE_TEMPLATE/platform_support.md" "start from ADR 0010"
 assert_contains "$DOC" "brew install setupproof/tap/setupproof"
 assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.3"
 assert_contains "$DOC" "setupproof_0.1.3_checksums.txt"
