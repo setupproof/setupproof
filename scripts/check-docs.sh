@@ -119,6 +119,7 @@ assert_contains "$ROOT/examples/monorepo/packages/web/package.json" '"license": 
 assert_contains "$ROOT/examples/rust/Cargo.toml" 'license = "Apache-2.0"'
 assert_contains "$ROOT/README.md" "docs/ARCHITECTURE.md"
 assert_contains "$ROOT/README.md" "docs/DOCKER_RUNNER.md"
+assert_contains "$ROOT/README.md" "v0.1 platform support, including WSL2 for Windows users"
 assert_contains "$ROOT/README.md" "docs/RECIPES.md"
 assert_contains "$ROOT/README.md" "docs/TROUBLESHOOTING.md"
 assert_contains "$ROOT/README.md" "docs/SCHEMAS.md"

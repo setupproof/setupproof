@@ -202,7 +202,8 @@ jobs:
 - `docs/demo/terminal-demo.txt` is a checked transcript of the terminal demo.
 - `docs/ARCHITECTURE.md` explains the package map and core invariants.
 - `docs/DOCKER_RUNNER.md` documents Docker runner tradeoffs and trust boundaries.
-- `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
+- `docs/INSTALL.md` covers release archives, GitHub Actions, CI snippets, and
+  v0.1 platform support, including WSL2 for Windows users.
 - `docs/RECIPES.md` collects copyable `setupproof.yml` starters for common repository layouts.
 - `docs/RELEASE_READINESS.md` lists release checks.
 - `docs/SCHEMAS.md` lists versioned JSON Schema URLs for plan, report, and config validation.
