@@ -12,6 +12,7 @@ Before tagging a release, verify:
 - `bash scripts/check-github-action.sh`
 - `sh scripts/check-docs.sh`
 - `sh scripts/check-examples.sh`
+- `make schemas`
 - `make release-archives VERSION=<major.minor.patch>`
 - `make npm-check VERSION=<major.minor.patch>`
 - `make release-check VERSION=<major.minor.patch>`
@@ -54,6 +55,14 @@ Release automation gates:
   security gates rather than the oldest module language version.
 - Keep the required SetupProof workflow small and fast; add slower
   release-oriented checks to the release checks workflow.
+
+Schema publication gates:
+
+- `schemas/` contains the source plan, report, and config schemas.
+- `docs/schemas/v1.0.0/` contains the public GitHub Pages copies.
+- Schema `$id` values point at the versioned public URLs.
+- `make schemas` verifies the root schema files and public copies match before
+  release publication.
 
 Action wrapper gates:
 

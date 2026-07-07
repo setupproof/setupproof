@@ -59,8 +59,9 @@ redacted output tails, and runner/workspace details.
 ## Schemas
 
 SetupProof publishes JSON Schemas for plan output, report output, and
-`setupproof.yml`. The schema files do not declare `$id` values until there is
-an immutable public URL for released schemas.
+`setupproof.yml`. Released schemas use versioned `$id` values under
+`https://setupproof.github.io/setupproof/schemas/v1.0.0/`; root schema files
+and the published Pages copies must stay byte-for-byte identical.
 
 ## Marketplace
 

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/url"
 	"os"
 	"os/exec"
@@ -138,7 +139,69 @@ func TestConfigSchemaValidatesRepresentativeConfig(t *testing.T) {
 }`))
 }
 
+func TestPublishedSchemasHaveStableIDs(t *testing.T) {
+	cases := []struct {
+		file string
+		id   string
+	}{
+		{
+			file: "setupproof-plan.schema.json",
+			id:   "https://setupproof.github.io/setupproof/schemas/v1.0.0/setupproof-plan.schema.json",
+		},
+		{
+			file: "setupproof-report.schema.json",
+			id:   "https://setupproof.github.io/setupproof/schemas/v1.0.0/setupproof-report.schema.json",
+		},
+		{
+			file: "setupproof-config.schema.json",
+			id:   "https://setupproof.github.io/setupproof/schemas/v1.0.0/setupproof-config.schema.json",
+		},
+	}
+
+	root := repositoryRoot(t)
+	for _, tc := range cases {
+		t.Run(tc.file, func(t *testing.T) {
+			sourceRel := filepath.ToSlash(filepath.Join("schemas", tc.file))
+			publishedRel := filepath.ToSlash(filepath.Join("docs", "schemas", "v1.0.0", tc.file))
+			source := readFile(t, filepath.Join(root, filepath.FromSlash(sourceRel)))
+			published := readFile(t, filepath.Join(root, filepath.FromSlash(publishedRel)))
+			if !bytes.Equal(source, published) {
+				t.Fatalf("%s must match %s", publishedRel, sourceRel)
+			}
+
+			var meta struct {
+				Schema string `json:"$schema"`
+				ID     string `json:"$id"`
+			}
+			if err := json.Unmarshal(source, &meta); err != nil {
+				t.Fatalf("unmarshal %s: %v", sourceRel, err)
+			}
+			if meta.Schema != "https://json-schema.org/draft/2020-12/schema" {
+				t.Fatalf("%s $schema = %q", sourceRel, meta.Schema)
+			}
+			if meta.ID != tc.id {
+				t.Fatalf("%s $id = %q, want %q", sourceRel, meta.ID, tc.id)
+			}
+
+			compileJSONSchema(t, sourceRel)
+			compileJSONSchema(t, publishedRel)
+		})
+	}
+}
+
 func validateJSONSchema(t *testing.T, schemaRel string, data []byte) {
+	t.Helper()
+	schema := compileJSONSchema(t, schemaRel)
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("invalid JSON output: %v\n%s", err, string(data))
+	}
+	if err := schema.Validate(doc); err != nil {
+		t.Fatalf("%s validation failed: %v\n%s", schemaRel, err, string(data))
+	}
+}
+
+func compileJSONSchema(t *testing.T, schemaRel string) *jsonschema.Schema {
 	t.Helper()
 	root := repositoryRoot(t)
 	schemaPath := filepath.Join(root, filepath.FromSlash(schemaRel))
@@ -148,11 +211,14 @@ func validateJSONSchema(t *testing.T, schemaRel string, data []byte) {
 	if err != nil {
 		t.Fatalf("compile %s: %v", schemaRel, err)
 	}
-	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+	return schema
+}
+
+func readFile(t *testing.T, path string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("invalid JSON output: %v\n%s", err, string(data))
+		t.Fatalf("read %s: %v", path, err)
 	}
-	if err := schema.Validate(doc); err != nil {
-		t.Fatalf("%s validation failed: %v\n%s", schemaRel, err, string(data))
-	}
+	return data
 }

@@ -205,6 +205,7 @@ jobs:
 - `docs/INSTALL.md` covers release archives, GitHub Actions, and CI snippets.
 - `docs/RECIPES.md` collects copyable `setupproof.yml` starters for common repository layouts.
 - `docs/RELEASE_READINESS.md` lists release checks.
+- `docs/SCHEMAS.md` lists versioned JSON Schema URLs for plan, report, and config validation.
 - `docs/TROUBLESHOOTING.md` maps common failure output to the next command to
   run.
 - `schemas/` contains plan, report, and `setupproof.yml` JSON Schemas.
