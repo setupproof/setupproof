@@ -25,6 +25,52 @@ instructions. The tradeoff is that any future docs split (`docs/cli.md`,
 `docs/api.md`) needs a config update before SetupProof will inspect those
 files on a no-argument run.
 
+## Small Go Module
+
+```yaml
+version: 1
+
+defaults:
+  requireBlocks: true
+
+files:
+  - README.md
+```
+
+Use this for a single Go module whose README owns the contributor setup path.
+In a layout like `examples/go`, the marked block can stay as small as
+`go test ./...` with a stable marker such as `go-test`. Keep the marker on the
+command people should copy, not on surrounding explanation, so review output
+points back to the exact quickstart line.
+
+The tradeoff is scope: this recipe proves the root module path only. If the
+repository later grows generated code, integration tests, or service-specific
+docs, add those files explicitly instead of broadening to a docs glob.
+
+## Small Node/npm Package
+
+```yaml
+version: 1
+
+defaults:
+  requireBlocks: true
+
+files:
+  - README.md
+```
+
+Use this for a package whose root README contains the npm setup path. In a
+layout like `examples/node-npm`, the marked block can run `npm test` directly;
+projects with lockfiles can mark the full copyable path, such as `npm ci`
+followed by `npm test`, in one shell block with a marker such as
+`node-npm-test`.
+
+Do not pass registry tokens or other secrets for this recipe. SetupProof starts
+with no secret environment passthrough, so a public README setup path should be
+verifiable without private credentials. If a package needs a token-protected
+registry, keep this recipe in review mode until the project has a documented,
+redacted `env.pass` policy.
+
 ## Docs Split Across README And `docs/*.md`
 
 ```yaml
