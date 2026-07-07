@@ -197,7 +197,10 @@ environment, workspace, and report decisions required before native support is
 documented. ADR 0011 records the current shell decision: `shell` means POSIX
 `sh`, not PowerShell or `cmd`. ADR 0012 records the path and environment
 decision: repository paths stay slash-normalized and native Windows
-environment behavior remains unsupported.
+environment behavior remains unsupported. ADR 0013 records the workspace and
+report compatibility decision: native Windows tests may cover Git workspace
+copying and unsupported-platform reports without advertising native execution
+support.
 
 For CI on untrusted pull requests, pass no secrets by default, prefer hosted
 ephemeral runners, and run `setupproof review README.md` before executing marked

@@ -82,7 +82,8 @@ Windows, run SetupProof through WSL2. ADR 0010 records the native Windows
 support boundary and the compatibility work required before support is
 documented. ADR 0011 records that `shell` remains POSIX `sh`, not PowerShell
 or `cmd`. ADR 0012 records that native Windows path and environment behavior
-remains unsupported.
+remains unsupported. ADR 0013 records that native Windows workspace and report
+compatibility checks do not imply native execution support.
 
 ## Docker Runner Problems
 

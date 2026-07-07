@@ -21,7 +21,8 @@ info-string form.
 
 Execution uses a Git tracked-plus-modified temporary copy by default. The copy
 includes tracked files as they exist in the working tree, excludes ignored and
-untracked files by default, and omits `.git`.
+untracked files by default, omits `.git`, and reports omitted Git submodule
+Gitlink entries.
 
 ## Runners
 
@@ -55,7 +56,10 @@ PowerShell, `pwsh`, and `cmd` fences remain unsupported until a future ADR
 changes that contract. ADR 0012 records the current path and environment
 decision: repository paths stay slash-normalized, runner environments are
 allowlist-built, and native Windows case-insensitive environment handling is
-not supported until a future ADR changes that contract.
+not supported until a future ADR changes that contract. ADR 0013 records the
+current workspace and report compatibility decision: native Windows tests cover
+Git workspace copying and schema-compatible unsupported-platform reports
+without advertising native execution support.
 
 ## Environment
 

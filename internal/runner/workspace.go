@@ -17,6 +17,7 @@ type workspaceSource struct {
 	trackedChanged     bool
 	untrackedIncluded  bool
 	untrackedFileCount int
+	submoduleFileCount int
 }
 
 type workspace struct {
@@ -58,7 +59,7 @@ func gitWorkingTreeError(detail string) error {
 }
 
 func loadWorkspaceSource(root string, includeUntracked bool) (workspaceSource, error) {
-	tracked, err := gitListFiles(root, "--cached")
+	tracked, submoduleCount, err := gitListTrackedWorkspaceFiles(root)
 	if err != nil {
 		return workspaceSource{}, err
 	}
@@ -88,7 +89,38 @@ func loadWorkspaceSource(root string, includeUntracked bool) (workspaceSource, e
 		trackedChanged:     changed,
 		untrackedIncluded:  includeUntracked,
 		untrackedFileCount: untrackedCount,
+		submoduleFileCount: submoduleCount,
 	}, nil
+}
+
+func gitListTrackedWorkspaceFiles(root string) ([]string, int, error) {
+	cmd := exec.Command("git", "-C", root, "ls-files", "-z", "--stage")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to list Git workspace files: %w", err)
+	}
+	parts := bytes.Split(out, []byte{0})
+	files := make([]string, 0, len(parts))
+	submoduleCount := 0
+	for _, part := range parts {
+		if len(part) == 0 {
+			continue
+		}
+		meta, pathBytes, ok := bytes.Cut(part, []byte{'\t'})
+		if !ok {
+			return nil, 0, fmt.Errorf("failed to parse Git workspace file entry %q", string(part))
+		}
+		mode, _, ok := strings.Cut(string(meta), " ")
+		if !ok || mode == "" {
+			return nil, 0, fmt.Errorf("failed to parse Git workspace file mode %q", string(meta))
+		}
+		if mode == "160000" {
+			submoduleCount++
+			continue
+		}
+		files = append(files, filepath.ToSlash(string(pathBytes)))
+	}
+	return files, submoduleCount, nil
 }
 
 func gitListFiles(root string, args ...string) ([]string, error) {

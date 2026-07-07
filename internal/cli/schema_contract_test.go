@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
@@ -207,11 +208,19 @@ func compileJSONSchema(t *testing.T, schemaRel string) *jsonschema.Schema {
 	schemaPath := filepath.Join(root, filepath.FromSlash(schemaRel))
 	compiler := jsonschema.NewCompiler()
 	compiler.DefaultDraft(jsonschema.Draft2020)
-	schema, err := compiler.Compile((&url.URL{Scheme: "file", Path: schemaPath}).String())
+	schema, err := compiler.Compile(fileURL(schemaPath))
 	if err != nil {
 		t.Fatalf("compile %s: %v", schemaRel, err)
 	}
 	return schema
+}
+
+func fileURL(path string) string {
+	path = filepath.ToSlash(path)
+	if filepath.VolumeName(path) != "" && !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	return (&url.URL{Scheme: "file", Path: path}).String()
 }
 
 func readFile(t *testing.T, path string) []byte {
