@@ -6,6 +6,7 @@ ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 DOC="$ROOT/docs/INSTALL.md"
 NATIVE_WINDOWS_ADR="$ROOT/docs/adr/0010-native-windows-support-scope.md"
 NATIVE_WINDOWS_SHELL_ADR="$ROOT/docs/adr/0011-native-windows-shell-semantics.md"
+NATIVE_WINDOWS_PATH_ENV_ADR="$ROOT/docs/adr/0012-native-windows-path-and-environment-semantics.md"
 PUBLIC_DOCS="$ROOT/README.md
 $ROOT/LICENSE
 $ROOT/CODE_OF_CONDUCT.md
@@ -61,6 +62,7 @@ assert_not_contains() {
 [ -f "$DOC" ] || fail "missing docs/INSTALL.md"
 [ -f "$NATIVE_WINDOWS_ADR" ] || fail "missing native Windows ADR"
 [ -f "$NATIVE_WINDOWS_SHELL_ADR" ] || fail "missing native Windows shell ADR"
+[ -f "$NATIVE_WINDOWS_PATH_ENV_ADR" ] || fail "missing native Windows path/env ADR"
 [ -f "$ROOT/schemas/setupproof-config.schema.json" ] || fail "missing config schema"
 for file in $PUBLIC_DOCS; do
   [ -f "$file" ] || fail "missing public doc: $file"
@@ -75,17 +77,23 @@ assert_contains "$DOC" "PowerShell fenced blocks are unsupported in v0.1"
 assert_contains "$DOC" "WSL2"
 assert_contains "$DOC" "ADR 0010 records the native Windows support boundary"
 assert_contains "$DOC" "ADR 0011 records the current shell decision"
+assert_contains "$DOC" "ADR 0012 records the path and environment"
 assert_contains "$NATIVE_WINDOWS_ADR" "Native Windows execution remains unsupported in v0.1"
 assert_contains "$NATIVE_WINDOWS_ADR" "Windows CI coverage runs the relevant CLI, runner, report, and docs tests"
 assert_contains "$NATIVE_WINDOWS_ADR" 'PowerShell and `cmd` fences are unsupported'
 assert_contains "$NATIVE_WINDOWS_SHELL_ADR" "Native Windows shell execution is not supported in v0.1"
 assert_contains "$NATIVE_WINDOWS_SHELL_ADR" '`powershell`, `pwsh`, and `cmd` fences are unsupported'
 assert_contains "$NATIVE_WINDOWS_SHELL_ADR" 'The local and Action runners must not reinterpret `shell`'
+assert_contains "$NATIVE_WINDOWS_PATH_ENV_ADR" "Native Windows path and environment behavior remains unsupported in v0.1"
+assert_contains "$NATIVE_WINDOWS_PATH_ENV_ADR" "Absolute Git workspace paths, including native Windows drive-letter and UNC"
+assert_contains "$NATIVE_WINDOWS_PATH_ENV_ADR" "Native Windows case-insensitive environment-name handling is not supported"
 assert_contains "$ROOT/docs/DECISIONS.md" "ADR 0010 records the support boundary"
 assert_contains "$ROOT/docs/DECISIONS.md" "ADR 0011 records the current shell decision"
+assert_contains "$ROOT/docs/DECISIONS.md" "ADR 0012 records the current path and environment"
 assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "ADR 0010 records the native Windows"
 assert_contains "$ROOT/docs/TROUBLESHOOTING.md" 'ADR 0011 records that `shell` remains POSIX'
-assert_contains "$ROOT/.github/ISSUE_TEMPLATE/platform_support.md" "start from ADR 0010 and ADR 0011"
+assert_contains "$ROOT/docs/TROUBLESHOOTING.md" "ADR 0012 records that native Windows path and environment"
+assert_contains "$ROOT/.github/ISSUE_TEMPLATE/platform_support.md" "start from ADR 0010, ADR 0011, and ADR 0012"
 assert_contains "$DOC" "brew install setupproof/tap/setupproof"
 assert_contains "$DOC" "go install github.com/setupproof/setupproof/cmd/setupproof@v0.1.3"
 assert_contains "$DOC" "setupproof_0.1.3_checksums.txt"

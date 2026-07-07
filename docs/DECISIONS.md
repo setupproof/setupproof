@@ -52,7 +52,10 @@ Windows requires explicit CI coverage plus shell, path, environment, workspace,
 and report compatibility decisions before docs or packages advertise support.
 ADR 0011 records the current shell decision: `shell` stays POSIX `sh`, and
 PowerShell, `pwsh`, and `cmd` fences remain unsupported until a future ADR
-changes that contract.
+changes that contract. ADR 0012 records the current path and environment
+decision: repository paths stay slash-normalized, runner environments are
+allowlist-built, and native Windows case-insensitive environment handling is
+not supported until a future ADR changes that contract.
 
 ## Environment
 
