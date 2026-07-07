@@ -192,6 +192,10 @@ v0.1 platform support:
 - PowerShell fenced blocks are unsupported in v0.1. Use `sh`, `bash`, or
   `shell` fenced blocks for marked quickstarts.
 
+ADR 0010 records the native Windows support boundary and the CI, shell, path,
+environment, workspace, and report decisions required before native support is
+documented.
+
 For CI on untrusted pull requests, pass no secrets by default, prefer hosted
 ephemeral runners, and run `setupproof review README.md` before executing marked
 blocks.

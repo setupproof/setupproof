@@ -44,6 +44,13 @@ Marked blocks run as non-interactive shell scripts. Stdin is closed, no TTY is
 allocated, strict mode is enabled by default, and blocks in one target file share
 state unless a block is isolated.
 
+## Native Windows
+
+Native Windows execution remains outside v0.1 scope, and Windows users should
+run SetupProof through WSL2. ADR 0010 records the support boundary: native
+Windows requires explicit CI coverage plus shell, path, environment, workspace,
+and report compatibility decisions before docs or packages advertise support.
+
 ## Environment
 
 No user environment variables pass by default beyond the sanitized baseline.
