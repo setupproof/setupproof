@@ -7,6 +7,7 @@ cd "$ROOT"
 
 go test ./internal/platform
 go test -run 'TestBuildRejectsNativeWindowsShellLanguages|TestBuildRejectsUnsupportedMarkedLanguage' ./internal/planning
+go test -run 'TestCleanGitRelativePathRejectsNativeWindowsAbsolutePaths|TestBaselineEnvUsesWorkspaceScopedPathsAndSecretValues' ./internal/runner
 go test -run 'TestInstallDocCISnippetsAndDeferredClaims|TestInitWorkflowPrintsConservativeWorkflowOnly' ./internal/cli
 sh scripts/check-docs.sh
 

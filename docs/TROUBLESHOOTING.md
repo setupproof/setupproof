@@ -81,7 +81,8 @@ Native Windows execution and PowerShell fences are unsupported in v0.1. On
 Windows, run SetupProof through WSL2. ADR 0010 records the native Windows
 support boundary and the compatibility work required before support is
 documented. ADR 0011 records that `shell` remains POSIX `sh`, not PowerShell
-or `cmd`.
+or `cmd`. ADR 0012 records that native Windows path and environment behavior
+remains unsupported.
 
 ## Docker Runner Problems
 

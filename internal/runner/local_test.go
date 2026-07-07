@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"syscall"
 	"testing"
@@ -628,6 +629,75 @@ func TestLocalStateCWDValidationRejectsOutsideSymlink(t *testing.T) {
 	}
 }
 
+func TestCleanGitRelativePathRejectsNativeWindowsAbsolutePaths(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("native Windows path handling is checked on Windows CI")
+	}
+	for _, rel := range []string{
+		`C:/repo/README.md`,
+		`C:\repo\README.md`,
+		`//server/share/README.md`,
+		`\\server\share\README.md`,
+	} {
+		t.Run(rel, func(t *testing.T) {
+			if _, err := cleanGitRelativePath(rel); err == nil {
+				t.Fatalf("expected %q to be rejected as a repository-relative path", rel)
+			}
+		})
+	}
+}
+
+func TestBaselineEnvUsesWorkspaceScopedPathsAndSecretValues(t *testing.T) {
+	t.Setenv("PATH", "host-tool-path")
+	t.Setenv("LANG", "unsafe-locale")
+	t.Setenv("LC_ALL", "unsafe-lc-all")
+	t.Setenv("SETUPPROOF_ALLOWED_ENV", "allowed-value")
+	t.Setenv("SETUPPROOF_SECRET_ENV", "secret-value")
+
+	wsRoot := t.TempDir()
+	ws := &workspace{
+		homeDir: filepath.Join(wsRoot, "home"),
+		tmpDir:  filepath.Join(wsRoot, "tmp"),
+	}
+	envPlan := planning.Env{
+		Allow: []string{"SETUPPROOF_ALLOWED_ENV", "SETUPPROOF_MISSING_ENV"},
+		Pass: []planning.EnvPass{
+			{Name: "SETUPPROOF_SECRET_ENV", Secret: true},
+		},
+	}
+
+	var stderr bytes.Buffer
+	env, secretValues, err := baselineEnv(envPlan, ws, &stderr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	values := envValues(env)
+
+	for name, want := range map[string]string{
+		"HOME":                   ws.homeDir,
+		"TMPDIR":                 ws.tmpDir,
+		"PATH":                   "host-tool-path",
+		"LANG":                   "C.UTF-8",
+		"CI":                     "true",
+		"SETUPPROOF":             "1",
+		"SETUPPROOF_ALLOWED_ENV": "allowed-value",
+		"SETUPPROOF_SECRET_ENV":  "secret-value",
+	} {
+		if got := values[name]; got != want {
+			t.Fatalf("%s = %q, want %q in env %#v", name, got, want, env)
+		}
+	}
+	if _, ok := values["LC_ALL"]; ok {
+		t.Fatalf("unsafe LC_ALL should be omitted from baseline env: %#v", env)
+	}
+	if len(secretValues) != 1 || secretValues[0] != "secret-value" {
+		t.Fatalf("secret values = %#v", secretValues)
+	}
+	if !strings.Contains(stderr.String(), "warning: optional environment variable SETUPPROOF_MISSING_ENV is not set") {
+		t.Fatalf("missing env warning = %q", stderr.String())
+	}
+}
+
 func runLocal(t *testing.T, dir string, req planning.Request, opts Options) (int, string, string) {
 	t.Helper()
 	if req.CWD == "" {
@@ -673,6 +743,17 @@ func writeFile(t *testing.T, root string, rel string, contents string) {
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func envValues(env []string) map[string]string {
+	values := make(map[string]string, len(env))
+	for _, entry := range env {
+		name, value, ok := strings.Cut(entry, "=")
+		if ok {
+			values[name] = value
+		}
+	}
+	return values
 }
 
 func keptWorkspacePath(t *testing.T, stderr string) string {
