@@ -4,7 +4,7 @@ STATICCHECK_VERSION ?= v0.6.1
 GOVULNCHECK_VERSION ?= v1.1.4
 ACTIONLINT_VERSION ?= v1.7.7
 
-.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples check staticcheck vuln actionlint release-archives npm-package npm-check release-check
+.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples schemas check staticcheck vuln actionlint release-archives npm-package npm-check release-check
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o ./setupproof ./cmd/setupproof
@@ -39,7 +39,10 @@ docs:
 examples:
 	sh scripts/check-examples.sh
 
-check: test vet race foundation action docs examples dogfood
+schemas:
+	go test -run TestPublishedSchemasHaveStableIDs ./internal/cli
+
+check: test vet race foundation action docs examples schemas dogfood
 
 staticcheck:
 	GOTOOLCHAIN=auto go run honnef.co/go/tools/cmd/staticcheck@$(STATICCHECK_VERSION) ./...
@@ -59,6 +62,6 @@ npm-package: release-archives
 npm-check: npm-package
 	scripts/check-npm-package.sh v$(VERSION)
 
-release-check: release-archives npm-package
+release-check: release-archives npm-package schemas
 	scripts/check-release-archives.sh v$(VERSION)
 	scripts/check-npm-package.sh v$(VERSION)

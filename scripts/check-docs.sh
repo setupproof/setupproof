@@ -16,6 +16,7 @@ $ROOT/docs/DOCKER_RUNNER.md
 $ROOT/docs/INSTALL.md
 $ROOT/docs/RECIPES.md
 $ROOT/docs/RELEASE_READINESS.md
+$ROOT/docs/SCHEMAS.md
 $ROOT/docs/TROUBLESHOOTING.md
 $ROOT/docs/COMPARISON.md
 $ROOT/docs/DECISIONS.md
@@ -86,6 +87,7 @@ assert_contains "$ROOT/README.md" "docs/ARCHITECTURE.md"
 assert_contains "$ROOT/README.md" "docs/DOCKER_RUNNER.md"
 assert_contains "$ROOT/README.md" "docs/RECIPES.md"
 assert_contains "$ROOT/README.md" "docs/TROUBLESHOOTING.md"
+assert_contains "$ROOT/README.md" "docs/SCHEMAS.md"
 assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "security sandbox"
 assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "network: false"
 assert_contains "$ROOT/docs/DOCKER_RUNNER.md" "digest"
@@ -128,6 +130,8 @@ assert_contains "$ROOT/docs/ARCHITECTURE.md" "Report JSON is machine-facing outp
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Moving major Action tags"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-archives"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make npm-check"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make schemas"
+assert_contains "$ROOT/docs/RELEASE_READINESS.md" "Schema publication gates"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "make release-check"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "scripts/check-release-archives.sh"
 assert_contains "$ROOT/docs/RELEASE_READINESS.md" "scripts/check-npm-package.sh"
@@ -139,6 +143,10 @@ assert_contains "$ROOT/.github/repository-metadata.yml" "github-actions"
 assert_contains "$ROOT/.github/labels.yml" "good first issue"
 assert_contains "$ROOT/.github/labels.yml" "runner"
 assert_not_contains "$ROOT/.github/labels.yml" "launch"
+assert_contains "$ROOT/docs/SCHEMAS.md" "schemas/v1.0.0/setupproof-plan.schema.json"
+assert_contains "$ROOT/docs/SCHEMAS.md" "schemas/v1.0.0/setupproof-report.schema.json"
+assert_contains "$ROOT/docs/SCHEMAS.md" "schemas/v1.0.0/setupproof-config.schema.json"
+assert_contains "$ROOT/docs/SCHEMAS.md" "byte-for-byte"
 
 for file in $PUBLIC_DOCS; do
   assert_not_contains "$file" "pull_request_target"
