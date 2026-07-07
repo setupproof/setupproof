@@ -6,6 +6,7 @@ ROOT=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 cd "$ROOT"
 
 go test ./internal/platform
+go test -run 'TestBuildRejectsNativeWindowsShellLanguages|TestBuildRejectsUnsupportedMarkedLanguage' ./internal/planning
 go test -run 'TestInstallDocCISnippetsAndDeferredClaims|TestInitWorkflowPrintsConservativeWorkflowOnly' ./internal/cli
 sh scripts/check-docs.sh
 
