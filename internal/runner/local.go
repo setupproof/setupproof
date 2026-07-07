@@ -188,6 +188,11 @@ func prepareWorkspaceSource(req planning.Request, plan planning.Plan, stderr io.
 		fmt.Fprintf(stderr, "warning: %s\n", warning)
 		warnings = append(warnings, warning)
 	}
+	if source.submoduleFileCount > 0 {
+		warning := fmt.Sprintf("copied workspace omitted %d Git submodule path(s)", source.submoduleFileCount)
+		fmt.Fprintf(stderr, "warning: %s\n", warning)
+		warnings = append(warnings, warning)
+	}
 	return source, warnings, 0, "", true
 }
 

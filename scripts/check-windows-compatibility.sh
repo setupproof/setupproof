@@ -7,8 +7,8 @@ cd "$ROOT"
 
 go test ./internal/platform
 go test -run 'TestBuildRejectsNativeWindowsShellLanguages|TestBuildRejectsUnsupportedMarkedLanguage' ./internal/planning
-go test -run 'TestCleanGitRelativePathRejectsNativeWindowsAbsolutePaths|TestBaselineEnvUsesWorkspaceScopedPathsAndSecretValues' ./internal/runner
-go test -run 'TestInstallDocCISnippetsAndDeferredClaims|TestInitWorkflowPrintsConservativeWorkflowOnly' ./internal/cli
+go test -run 'TestCleanGitRelativePathRejectsNativeWindowsAbsolutePaths|TestBaselineEnvUsesWorkspaceScopedPathsAndSecretValues|TestNativeWindowsWorkspaceCopiesGitLayoutsAndCleansTempDirs|TestNativeWindowsWorkspaceCopiesSymlinksWhenAvailable|TestNativeWindowsWorkspaceSupportsLinkedWorktreeRoots|TestNativeWindowsWorkspaceOmitsSubmoduleGitlinks' ./internal/runner
+go test -run 'TestInstallDocCISnippetsAndDeferredClaims|TestInitWorkflowPrintsConservativeWorkflowOnly|TestNativeWindowsUnsupportedExecutionReportStaysSchemaCompatible' ./internal/cli
 sh scripts/check-docs.sh
 
 printf 'windows compatibility checks passed\n'

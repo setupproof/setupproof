@@ -22,6 +22,8 @@ Default copy mode:
 - Exclude ignored files.
 - Exclude untracked files.
 - Exclude the `.git` directory.
+- Omit Git submodule Gitlink entries from the copied workspace and report when
+  they were omitted.
 - Report when the copied workspace differs from `HEAD`.
 - Reject target, config, and copied symlink paths that resolve outside the
   repository root.
@@ -57,4 +59,6 @@ Temporary workspace behavior:
 - The implementation must not describe the workspace as a clean checkout.
 - Reports should use `tracked-plus-modified` as the default workspace source
   name.
+- Submodule-dependent setup commands need a future explicit copy policy before
+  submodule working trees are copied into temporary workspaces.
 - A future non-Git execution mode needs its own explicit copy-mode decision.
