@@ -32,6 +32,9 @@ npm package gates:
 - The package bundles Linux and macOS binaries for `amd64`/`arm64`; it does not
   use postinstall scripts, install-time downloads, native builds, telemetry, or
   hidden update checks.
+- The generated binary manifest must list each supported platform/architecture
+  exactly once, match the release checksum manifest, and declare every vendored
+  binary shipped in the package.
 - `scripts/check-npm-package.sh` runs `npm pack --dry-run`, packs the tarball,
   installs it into a clean temporary project, and verifies
   `setupproof --version`.
