@@ -492,6 +492,8 @@ test_summary_renderer_keeps_block_details() {
 }
 
 test_no_secret_default_workflow_shape() {
+  local release_checks="$ROOT/.github/workflows/release-checks.yml"
+
   assert_contains "$ROOT/action.yml" "default: action-local"
   assert_contains "$ROOT/action.yml" "default: \"true\""
   assert_contains "$ROOT/action.yml" "published release"
@@ -513,6 +515,14 @@ test_no_secret_default_workflow_shape() {
   assert_not_contains "$ROOT/.github/workflows/setupproof.yml" "secrets."
   assert_not_contains "$ROOT/.github/workflows/setupproof.yml" "github.token"
   assert_not_contains "$ROOT/.github/workflows/setupproof.yml" "@""v1"
+
+  assert_contains "$release_checks" "windows-compatibility:"
+  assert_contains "$release_checks" "runs-on: windows-2025"
+  assert_contains "$release_checks" "sh scripts/check-windows-compatibility.sh"
+  assert_not_contains "$release_checks" "pull_request_target"
+  assert_not_contains "$release_checks" "secrets."
+  assert_not_contains "$release_checks" "github.token"
+  assert_not_contains "$release_checks" "@""v1"
 }
 
 test_local_cli_input_mapping

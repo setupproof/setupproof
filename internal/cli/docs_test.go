@@ -14,7 +14,7 @@ func TestInstallDocCISnippetsAndDeferredClaims(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	doc := string(data)
+	doc := strings.ReplaceAll(string(data), "\r\n", "\n")
 
 	for _, want := range []string{
 		"SetupProof v0.1.3 ships as a Go module, Homebrew tap",
