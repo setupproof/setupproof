@@ -194,7 +194,8 @@ v0.1 platform support:
 
 ADR 0010 records the native Windows support boundary and the CI, shell, path,
 environment, workspace, and report decisions required before native support is
-documented.
+documented. ADR 0011 records the current shell decision: `shell` means POSIX
+`sh`, not PowerShell or `cmd`.
 
 For CI on untrusted pull requests, pass no secrets by default, prefer hosted
 ephemeral runners, and run `setupproof review README.md` before executing marked

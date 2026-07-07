@@ -265,6 +265,35 @@ blocks:
 	}
 }
 
+func TestBuildRejectsNativeWindowsShellLanguages(t *testing.T) {
+	for _, language := range []string{"powershell", "pwsh", "cmd"} {
+		t.Run(language, func(t *testing.T) {
+			dir := t.TempDir()
+			writeFile(t, dir, "README.md", "```"+language+" setupproof id=install\nWrite-Output ok\n```\n")
+
+			result, err := Build(Request{
+				CWD:              dir,
+				Positional:       []string{"README.md"},
+				HasRequireBlocks: true,
+				RequireBlocks:    true,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.ExitCode != 2 {
+				t.Fatalf("exit code = %d, errors = %#v", result.ExitCode, result.Plan.ValidationErrors)
+			}
+			if len(result.Plan.Blocks) != 0 {
+				t.Fatalf("blocks = %#v", result.Plan.Blocks)
+			}
+			want := `README.md:1: marked block language "` + language + `" is not supported; use sh, bash, or shell`
+			if !contains(result.Plan.ValidationErrors, want) {
+				t.Fatalf("validation errors = %#v", result.Plan.ValidationErrors)
+			}
+		})
+	}
+}
+
 func TestBuildRejectsNetworkFalseForLocalRunner(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "README.md", "```sh setupproof network=false\nnpm test\n```\n")

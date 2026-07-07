@@ -50,6 +50,9 @@ Native Windows execution remains outside v0.1 scope, and Windows users should
 run SetupProof through WSL2. ADR 0010 records the support boundary: native
 Windows requires explicit CI coverage plus shell, path, environment, workspace,
 and report compatibility decisions before docs or packages advertise support.
+ADR 0011 records the current shell decision: `shell` stays POSIX `sh`, and
+PowerShell, `pwsh`, and `cmd` fences remain unsupported until a future ADR
+changes that contract.
 
 ## Environment
 
