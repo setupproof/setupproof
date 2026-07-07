@@ -32,3 +32,18 @@ jobs:
         run: make actionlint
       - name: Verify release archives
         run: make release-check VERSION=0.1.3
+
+  windows-compatibility:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25.8"
+          cache: true
+      - name: Run Windows compatibility boundary checks
+        shell: bash
+        run: sh scripts/check-windows-compatibility.sh

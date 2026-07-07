@@ -4,7 +4,7 @@ STATICCHECK_VERSION ?= v0.6.1
 GOVULNCHECK_VERSION ?= v1.1.4
 ACTIONLINT_VERSION ?= v1.7.7
 
-.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples schemas check staticcheck vuln actionlint release-archives npm-package npm-check release-check
+.PHONY: build test vet race fmt fmt-check dogfood foundation action docs examples schemas windows-compatibility check staticcheck vuln actionlint release-archives npm-package npm-check release-check
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o ./setupproof ./cmd/setupproof
@@ -41,6 +41,9 @@ examples:
 
 schemas:
 	go test -run TestPublishedSchemasHaveStableIDs ./internal/cli
+
+windows-compatibility:
+	sh scripts/check-windows-compatibility.sh
 
 check: test vet race foundation action docs examples schemas dogfood
 
