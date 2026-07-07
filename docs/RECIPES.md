@@ -45,6 +45,58 @@ behavior predictable - the tool inspects exactly the listed files in order.
 `requireBlocks: true` makes a typo in a marker fail loudly instead of silently
 producing an empty plan.
 
+## Monorepo With Package-Local Quickstarts
+
+```yaml
+version: 1
+
+defaults:
+  requireBlocks: true
+
+files:
+  - docs/web.md
+  - docs/api.md
+```
+
+Use this when the repository root owns CI, but the setup paths live next to
+package or service docs. Keep the file list explicit so each package-local
+README or docs page is reviewed in a stable order. In a layout like
+`examples/monorepo`, `docs/web.md` can mark a block that runs
+`npm --prefix packages/web test`, while `docs/api.md` can mark a block that
+runs `go test ./services/api/...`.
+
+To generate both the config and a pinned GitHub Actions workflow for those
+targets:
+
+```sh
+setupproof init --workflow docs/web.md docs/api.md
+```
+
+The generated workflow maps the same target list into the Action input:
+
+```yaml
+- uses: setupproof/setupproof@v0.1.3
+  with:
+    cli-version: v0.1.3
+    mode: review
+    require-blocks: "true"
+    files: |
+      docs/web.md
+      docs/api.md
+- uses: setupproof/setupproof@v0.1.3
+  with:
+    cli-version: v0.1.3
+    require-blocks: "true"
+    files: |
+      docs/web.md
+      docs/api.md
+```
+
+The tradeoff is maintenance: every package docs split needs a matching
+`files:` update. That explicit list is still safer than globbing broad docs
+trees, because unmarked examples stay inert and newly added setup docs require
+an intentional CI decision.
+
 ## Examples That Should Be Reviewed But Not Run
 
 ```yaml
