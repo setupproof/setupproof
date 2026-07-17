@@ -85,6 +85,21 @@ func TestMarkerMetadataAllowsQuotedWhitespace(t *testing.T) {
 	}
 }
 
+func TestMarkerMetadataReportsDuplicateKeys(t *testing.T) {
+	input := []byte("<!-- setupproof id=first id=second -->\n```sh\ntrue\n```\n")
+
+	blocks := Discover("README.md", input)
+	if len(blocks) != 1 {
+		t.Fatalf("expected 1 block, got %d", len(blocks))
+	}
+	if blocks[0].Metadata["id"] != "first" {
+		t.Fatalf("metadata = %#v", blocks[0].Metadata)
+	}
+	if len(blocks[0].Warnings) != 1 || blocks[0].Warnings[0] != `duplicate marker metadata key "id"` {
+		t.Fatalf("warnings = %#v", blocks[0].Warnings)
+	}
+}
+
 func TestDiscoverShellAlias(t *testing.T) {
 	input := []byte("```shell setupproof id=alias\nprintf ok\n```\n")
 

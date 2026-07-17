@@ -50,9 +50,9 @@ make build
 ./setupproof --require-blocks --no-color --no-glyphs README.md
 ```
 
-Use `make build VERSION=<tag>` when building a release binary from a tagged
-checkout. Use `make release-archives VERSION=0.1.3` to build the release
-archive set locally.
+Use `make build VERSION=<plain-version>` when building a release binary from a
+tagged checkout, for example `make build VERSION=0.1.3`. Use
+`make release-archives VERSION=0.1.3` to build the release archive set locally.
 
 For a new project, `setupproof init` writes only `setupproof.yml` by default.
 Use `setupproof init --workflow` to write the config and

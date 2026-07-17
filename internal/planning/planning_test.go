@@ -163,6 +163,22 @@ func TestBuildRejectsDuplicateExplicitIDs(t *testing.T) {
 	}
 }
 
+func TestBuildRejectsDuplicateMarkerMetadata(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "README.md", "```sh setupproof id=quickstart timeout=30s timeout=60s\ntrue\n```\n")
+
+	result, err := Build(Request{CWD: dir, Positional: []string{"README.md"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.ExitCode != 2 {
+		t.Fatalf("exit code = %d, errors = %#v", result.ExitCode, result.Plan.ValidationErrors)
+	}
+	if !contains(result.Plan.ValidationErrors, `README.md:1: duplicate marker metadata key "timeout"`) {
+		t.Fatalf("validation errors = %#v", result.Plan.ValidationErrors)
+	}
+}
+
 func TestBuildRejectsInvalidRunnerInConfig(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "README.md", "```sh setupproof\nnpm test\n```\n")

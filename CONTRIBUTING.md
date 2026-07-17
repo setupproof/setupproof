@@ -46,7 +46,7 @@ make check
 make staticcheck
 make vuln
 make actionlint
-make release-check
+make release-check VERSION=0.1.3
 ```
 
 `make check` runs the same repository checks documented in

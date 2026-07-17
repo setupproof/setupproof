@@ -25,7 +25,7 @@ func Doctor(req planning.Request, stdout io.Writer, stderr io.Writer) int {
 		return 2
 	}
 
-	fmt.Fprintf(stdout, "root: %s\n", resolver.Root)
+	fmt.Fprintf(stdout, "root: %s\n", doctorRootLabel(resolver.CWD, resolver.Root))
 	if gitLayoutWarning(resolver.Root) {
 		fmt.Fprintln(stdout, "git layout: .git is a file; treating this worktree or submodule root as the repository boundary")
 	}
@@ -83,6 +83,14 @@ func gitLayoutWarning(root string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func doctorRootLabel(cwd string, root string) string {
+	rel, err := filepath.Rel(cwd, root)
+	if err != nil || rel == "" {
+		return "."
+	}
+	return filepath.ToSlash(rel)
 }
 
 func doctorConfigFile(req planning.Request, resolver project.Resolver) (project.ResolvedFile, bool, error) {

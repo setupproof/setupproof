@@ -222,7 +222,12 @@ func Build(req Request) (Result, error) {
 		for _, discoveredBlock := range discovered {
 			markedBlockCount++
 			for _, warning := range discoveredBlock.Warnings {
-				plan.Warnings = append(plan.Warnings, fmt.Sprintf("%s:%d: %s", target.Rel, discoveredBlock.MarkerLine, warning))
+				message := fmt.Sprintf("%s:%d: %s", target.Rel, discoveredBlock.MarkerLine, warning)
+				if isDuplicateMarkerMetadataWarning(warning) {
+					plan.ValidationErrors = append(plan.ValidationErrors, message)
+					continue
+				}
+				plan.Warnings = append(plan.Warnings, message)
 			}
 			explicitID := discoveredBlock.Metadata["id"]
 			if explicitID != "" {
@@ -484,6 +489,10 @@ func unsupportedMarkedLanguageError(file string, block markdown.Block) string {
 		return fmt.Sprintf("%s:%d: marked block must use a supported shell language; use sh, bash, or shell", file, block.Line)
 	}
 	return fmt.Sprintf("%s:%d: marked block language %q is not supported; use sh, bash, or shell", file, block.Line, block.Language)
+}
+
+func isDuplicateMarkerMetadataWarning(warning string) bool {
+	return strings.HasPrefix(warning, "duplicate marker metadata key ")
 }
 
 func validateConfigEnv(cfg config.Config) error {

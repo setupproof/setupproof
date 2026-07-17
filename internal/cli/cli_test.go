@@ -561,6 +561,37 @@ func TestDoctorRunsNonExecutingChecks(t *testing.T) {
 			t.Fatalf("doctor output missing %q:\n%s", want, stdout.String())
 		}
 	}
+	if strings.Contains(stdout.String(), dir) {
+		t.Fatalf("doctor output leaked absolute root:\n%s", stdout.String())
+	}
+}
+
+func TestDoctorLabelsRepositoryRootRelativeToCurrentDirectory(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(dir, ".git"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	docs := filepath.Join(dir, "docs")
+	if err := os.Mkdir(docs, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	chdir(t, docs)
+	if err := os.WriteFile("README.md", []byte("```sh setupproof id=quickstart\ntrue\n```\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := Run([]string{"doctor", "README.md"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("exit code = %d, stderr = %q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "root: ..\n") {
+		t.Fatalf("doctor root label should be relative to cwd:\n%s", stdout.String())
+	}
+	if strings.Contains(stdout.String(), dir) {
+		t.Fatalf("doctor output leaked absolute root:\n%s", stdout.String())
+	}
 }
 
 func TestDoctorChecksDockerWhenConfiguredWithoutRunningBlocks(t *testing.T) {

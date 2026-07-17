@@ -274,9 +274,17 @@ func parseMetadata(tokens []string) (map[string]string, []string) {
 			warnings = append(warnings, "marker metadata token "+token+" must use key=value")
 			continue
 		}
+		if _, exists := metadata[key]; exists {
+			warnings = append(warnings, "duplicate marker metadata key "+quoteMarkerMetadataKey(key))
+			continue
+		}
 		metadata[key] = trimMatchingQuotes(value)
 	}
 	return metadata, warnings
+}
+
+func quoteMarkerMetadataKey(value string) string {
+	return `"` + strings.ReplaceAll(value, `"`, `\"`) + `"`
 }
 
 func markerTokens(text string) ([]string, []string) {

@@ -13,9 +13,13 @@ Before tagging a release, verify:
 - `sh scripts/check-docs.sh`
 - `sh scripts/check-examples.sh`
 - `make schemas`
-- `make release-archives VERSION=<major.minor.patch>`
-- `make npm-check VERSION=<major.minor.patch>`
-- `make release-check VERSION=<major.minor.patch>`
+- `make release-archives VERSION=0.1.3`
+- `make npm-check VERSION=0.1.3`
+- `make release-check VERSION=0.1.3`
+
+Pass the plain semantic version to Make targets without a leading `v`; the
+release scripts add the tag prefix when they call the archive and package
+checks.
 
 Release archive gates:
 
